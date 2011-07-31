@@ -1,0 +1,37 @@
+<?xml version="1.0"?>
+<document xmlns="http://maven.apache.org/XDOC/2.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/XDOC/2.0 http://maven.apache.org/xsd/xdoc-2.0.xsd">
+	<properties>
+		<title>Usage</title>
+	</properties>
+	<body>
+		<section name="Goals">
+			<p>Here is the DTO Maven Plugin usage.</p>
+
+			<h3>DTO Maven plugin usage.</h3>
+			<p><![CDATA[To generate DTO for your project set the following in the <build> section of your POM:]]></p>
+			<source><![CDATA[<project>
+  ...
+  <build>
+	<plugins>
+	  <plugin>
+		<groupId>fr.maven.dto</groupId>
+		<artifactId>dto-maven-plugin</artifactId>
+		<version>1.0</version>
+		<configuration>
+		  <sourceRoot>target/generated</sourceRoot>
+		  <includes>
+		    <include>fr.example.Bean</include>
+		    <include>fr.example.AnotherBean</include>
+		  </includes>
+		</configuration>
+	  </plugin>
+    </plugins>
+  </build>
+  ...
+</project>]]></source>
+		</section>
+	</body>
+</document>
+
+ 	  	 

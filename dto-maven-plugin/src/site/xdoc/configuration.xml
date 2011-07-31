@@ -1,0 +1,39 @@
+<?xml version="1.0"?>
+<document>
+  <properties>
+    <title>Configuration example</title>
+  </properties>
+  <body>
+    <section name="Example">
+      <p>Here is an example of a DTO Maven Plugin configuration.</p>
+      
+      <h3>DTO Maven Plugin configuration example.</h3>
+      <p>To provide you with better understanding of the configuration of the DTO Maven Plugin, you can take a look into the following example :</p>
+      <source><![CDATA[<project>
+  ...
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>fr.maven.dto</groupId>
+        <artifactId>dto-maven-plugin</artifactId>
+        <version>1.0</version>
+        <configuration>
+          <!-- The directory where the DTO classes will be generated, default value is target/generated -->
+          <sourceRoot>target/generated</sourceRoot>
+          <!-- The list of classes you want to generate DTO classes for.
+          <includes>
+            <include>fr.example.Bean</include>
+            <include>fr.example.AnotherBean</include>
+          </includes>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+  ...
+</project>]]></source>
+      
+    </section>
+  </body>
+</document>
+
+ 	  	 

@@ -1,0 +1,35 @@
+<?xml version="1.0"?>
+<document xmlns="http://maven.apache.org/XDOC/2.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/XDOC/2.0 http://maven.apache.org/xsd/xdoc-2.0.xsd">
+	<properties>
+		<title>Usage</title>
+	</properties>
+	<body>
+		<section name="Goals">
+			<p>Here is the DTO Maven Plugin goals.</p>
+
+			<h3>DTO Maven plugin goals</h3>
+			<table>
+			
+				<thead>
+					<tr>
+						<td>Goal</td>
+						<td>Description</td>
+					</tr>
+				</thead>
+				<tbody>
+                    <tr>
+                        <td>dto:dto</td>
+                        <td>Generates DTO beans.</td>
+                    </tr>
+                    <tr>
+                        <td>dto:help</td>
+                        <td>Displays help information on maven-pmd-plugin.</td>
+                    </tr>
+				</tbody>
+			</table>
+		</section>
+	</body>
+</document>
+
+ 	  	 
