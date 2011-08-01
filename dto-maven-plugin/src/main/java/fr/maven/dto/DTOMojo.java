@@ -128,14 +128,16 @@ public class DTOMojo extends AbstractMojo {
 	protected String getClasspath(File directory) {
 		StringBuffer classpath = new StringBuffer();
 		for (File clazz : this.getFiles(directory)) {
-			classpath.append(clazz.getAbsolutePath() + ";");
+			classpath.append(clazz.getAbsolutePath() + File.pathSeparator);
 		}
 		for (Artifact artifact : this.pluginArtifacts) {
-			classpath.append(artifact.getFile().getAbsolutePath() + ";");
+			classpath.append(artifact.getFile().getAbsolutePath()
+					+ File.pathSeparator);
 		}
 		for (Artifact artifact : this.projectDependencies) {
 			if (artifact.getFile() != null) {
-				classpath.append(artifact.getFile().getAbsolutePath() + ";");
+				classpath.append(artifact.getFile().getAbsolutePath()
+						+ File.pathSeparator);
 			}
 		}
 
