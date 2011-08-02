@@ -6,7 +6,7 @@ DTO Maven Plugin generates DTO for Java Bean classes.
 
 ## How to build DTO Maven Plugin
 
-* All you need is Java[http://www.java.com] and Maven 2[http://maven.apache.org/download.html] installed on your system.
+* All you need is [Java] [http://www.java.com] and [Maven 2] [http://maven.apache.org/download.html] installed on your system.
 * Then just install the plugin in your local repository.
 
     mvn clean install.
@@ -36,5 +36,5 @@ Add the dto-maven-plugin in the build plugins of your pom.xml and let's go:
         </plugins>
       </build>
       ...
-    </project>]]>
+    </project>
 
