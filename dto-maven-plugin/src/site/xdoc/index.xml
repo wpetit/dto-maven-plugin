@@ -8,6 +8,7 @@
   <body>
     <section name="Welcome to DTO Maven Plugin">
       <p>DTO Maven Plugin generates DTO for Java Bean classes and avoid to write them manually.</p>
+      <p>Because it generates DTO from compiled classes. It can only generate DTO classes for Java Bean in your dependencies.</p>
       
       <h3>Usage</h3>
       <p>General instructions on how to use the DTO Maven Plugin can be found on the <a href="usage.html">usage page.</a>. Some more
