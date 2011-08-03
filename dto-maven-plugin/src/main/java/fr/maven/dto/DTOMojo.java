@@ -1,21 +1,5 @@
 package fr.maven.dto;
 
-/*
- * Copyright 2001-2005 The Apache Software Foundation.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
@@ -30,7 +14,7 @@ import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 
 /**
- * Goal to generate DTO classes.
+ * Mojo to generate DTO classes.
  * 
  * @goal dto
  * 
@@ -83,22 +67,6 @@ public class DTOMojo extends AbstractMojo {
 	 */
 	private List<String> includeClasses;
 
-	// /**
-	// * Pattern to match classes we want to generate a DTO for.
-	// *
-	// * @parameter expression="${include}"
-	// * @required
-	// */
-	// private String[] includePatterns;
-	//
-	// /**
-	// * Pattern to match classes we do not want to generate a DTO for.
-	// *
-	// * @parameter expression="${exclude}"
-	// * @required
-	// */
-	// private String[] excludePatterns;
-
 	/**
 	 * {@inheritDoc}
 	 * 
@@ -106,26 +74,50 @@ public class DTOMojo extends AbstractMojo {
 	 */
 	@Override
 	public void execute() throws MojoExecutionException {
+		this.getLog().info("dto-maven-plugin execution");
+
+		// check parameters
+		if (!this.checkArgs()) {
+			throw new MojoExecutionException(
+					"Generation aborted due to previous errors.");
+		}
+
 		try {
+			// Get classes to generate DTO for
 			StringBuffer classes = new StringBuffer();
 			for (String clazz : this.includeClasses) {
 				classes.append(clazz + ";");
 			}
-			String cmd = "java -classpath "
-					+ this.getClasspath(this.outputDirectory)
-					+ " fr.maven.dto.DTOLauncher " + this.generatedDirectory
-					+ " " + classes;
 
+			// Generate the process to launch
+			String cmd = "java -classpath "
+					+ this.getClasspath(this.outputDirectory) + " "
+					+ DTOLauncher.class.getCanonicalName() + " "
+					+ this.generatedDirectory + " " + classes;
+
+			this.getLog().debug("dto-maven-plugin launching " + cmd);
+
+			// Get process result
 			int exitValue = this.runProcess(cmd);
 			if (exitValue != 0) {
+				this.getLog().error("The generation has failed.");
 				throw new MojoExecutionException("The generation has failed.");
 			}
 		} catch (Exception e) {
+			this.getLog().error("The generation has failed.", e);
 			throw new MojoExecutionException("The generation has failed.", e);
 		}
 	}
 
+	/**
+	 * Create the classpath to set to java process to launch the generation.
+	 * 
+	 * @param directory
+	 *            the directory that contains classes.
+	 * @return the classpath result.
+	 */
 	protected String getClasspath(File directory) {
+		this.getLog().debug("Begin classpath resolution");
 		StringBuffer classpath = new StringBuffer();
 		for (File clazz : this.getFiles(directory)) {
 			classpath.append(clazz.getAbsolutePath() + File.pathSeparator);
@@ -142,10 +134,19 @@ public class DTOMojo extends AbstractMojo {
 		}
 
 		classpath.append(";.");
+		this.getLog().debug("End classpath resolution");
 		return classpath.toString();
 	}
 
+	/**
+	 * Return all classes found in the directory given.
+	 * 
+	 * @param file
+	 *            the directory where classes to found are.
+	 * @return the list of classes found.
+	 */
 	protected List<File> getFiles(File file) {
+		this.getLog().debug("Begin classes listing");
 		List<File> classFiles = new ArrayList<File>();
 		if (file.exists()) {
 			if (file.isDirectory()) {
@@ -156,19 +157,34 @@ public class DTOMojo extends AbstractMojo {
 				classFiles.add(file);
 			}
 		}
+		this.getLog().debug("End classes listing");
 		return classFiles;
 	}
 
+	/**
+	 * Run the process of the given command.
+	 * 
+	 * @param cmd
+	 *            the command to launch
+	 * @return the process result.
+	 * @throws IOException
+	 *             if an I/O error occurs
+	 * @throws InterruptedException
+	 *             if the current thread is interrupted by another thread while
+	 *             it is waiting, then the wait is ended and an
+	 *             InterruptedException is thrown.
+	 */
 	protected int runProcess(String cmd) throws IOException,
 			InterruptedException {
+		this.getLog().debug("Begin running process");
 		Process process = Runtime.getRuntime().exec(cmd);
 
 		// Redirect error stream to logs
 		InputStream stdErr = process.getErrorStream();
 		InputStreamReader isrErr = new InputStreamReader(stdErr);
-		BufferedReader br = new BufferedReader(isrErr);
+		BufferedReader brErr = new BufferedReader(isrErr);
 		String lineErr = null;
-		while ((lineErr = br.readLine()) != null) {
+		while ((lineErr = brErr.readLine()) != null) {
 			this.getLog().error(lineErr);
 		}
 
@@ -180,6 +196,36 @@ public class DTOMojo extends AbstractMojo {
 		while ((lineIn = brIn.readLine()) != null) {
 			this.getLog().error(lineIn);
 		}
-		return process.waitFor();
+		int exitValue = process.waitFor();
+
+		brErr.close();
+		brIn.close();
+
+		this.getLog().debug("End running process");
+
+		return exitValue;
+	}
+
+	/**
+	 * Check configuration is valid.
+	 * 
+	 * @return <code>true</code> if the configuration is valid.
+	 *         <code>false</code> otherwise.
+	 */
+	protected boolean checkArgs() {
+		boolean argsValid = true;
+		// Check there are classes to generate.
+		if (this.includeClasses == null || this.includeClasses.isEmpty()) {
+			this.getLog()
+					.warn("No classes to generate. Please check the plugin configuration.");
+			argsValid = false;
+		}
+		// Check classes are compiled before generation.
+		if (this.outputDirectory == null || !this.outputDirectory.exists()) {
+			this.getLog()
+					.warn("Output directory does not exists. Please check the classes you want to generate DTOs for has been compiled.");
+			argsValid = false;
+		}
+		return argsValid;
 	}
 }

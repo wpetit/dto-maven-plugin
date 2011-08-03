@@ -8,10 +8,13 @@ import java.io.IOException;
 import java.util.List;
 
 /**
+ * This interface describes a DTO generator from {@link Class}.
+ * 
  * @author Wilfried Petit
  * 
  */
 public interface DTOGenerator {
+
 	/**
 	 * Generate DTOs for the classes given in parameter.
 	 * 

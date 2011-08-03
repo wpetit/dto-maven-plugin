@@ -15,13 +15,26 @@ import java.util.List;
 import java.util.Map;
 
 /**
+ * {@link DTOGenerator} implementation.
+ * 
  * @author Wilfried Petit
  * 
  */
 public class DTOGeneratorImpl implements DTOGenerator {
 
+	/**
+	 * File writes associated to classes.
+	 */
 	protected final Map<Class<?>, FileWriter> fileWriters;
+
+	/**
+	 * The classes list we want to generate for.
+	 */
 	protected List<Class<?>> classesToGenerate;
+
+	/**
+	 * The directory where DTOs will be generated.
+	 */
 	protected File generatedDirectory;
 
 	/**
@@ -33,11 +46,13 @@ public class DTOGeneratorImpl implements DTOGenerator {
 	}
 
 	/**
+	 * Set the DTOs generated directory.
+	 * 
 	 * @param generatedDirectory
-	 *            the generatedDirectory to set
+	 *            the DTOs generated directory to set
 	 */
 	@Override
-	public void setGeneratedDirectory(File generatedDirectory) {
+	public void setGeneratedDirectory(final File generatedDirectory) {
 		this.generatedDirectory = generatedDirectory;
 	}
 
@@ -49,21 +64,35 @@ public class DTOGeneratorImpl implements DTOGenerator {
 	 * @see fr.maven.dto.generator.DTOGenerator#generateDTOs(java.util.List)
 	 */
 	@Override
-	public void generateDTOs(List<Class<?>> classes) throws IOException {
+	public void generateDTOs(final List<Class<?>> classes) throws IOException {
 		this.classesToGenerate = classes;
 		for (Class<?> clazz : classes) {
 			this.generateDTO(clazz);
 		}
 	}
 
+	/**
+	 * 
+	 * {@inheritDoc}
+	 * 
+	 * @see fr.maven.dto.generator.DTOGenerator#generateDTO(java.lang.Class)
+	 */
 	@Override
-	public void generateDTO(Class<?> clazz) throws IOException {
+	public void generateDTO(final Class<?> clazz) throws IOException {
 		this.makeDTOPackage(clazz);
 		this.makeDTOClass(clazz);
 		this.getDTOClassFileWriter(clazz).close();
 	}
 
-	protected void makeDTOPackage(Class<?> clazz) throws IOException {
+	/**
+	 * Create the directory of the class package.
+	 * 
+	 * @param clazz
+	 *            the class we want to create the package directory for.
+	 * @throws IOException
+	 *             if the directory creation failed.
+	 */
+	protected void makeDTOPackage(final Class<?> clazz) throws IOException {
 		File packageDirectory = new File(
 				this.generatedDirectory.getAbsolutePath()
 						+ File.separator
@@ -78,15 +107,38 @@ public class DTOGeneratorImpl implements DTOGenerator {
 		}
 	}
 
-	protected String getDTOPackage(Class<?> clazz) {
+	/**
+	 * Return the package name of the DTO for the clazz given.
+	 * 
+	 * @param clazz
+	 *            the class we want to generate DTO for.
+	 * @return the package name got.
+	 */
+	protected String getDTOPackage(final Class<?> clazz) {
 		return clazz.getPackage().getName() + ".dto";
 	}
 
-	protected boolean isClassToGenerate(Class<?> clazz) {
+	/**
+	 * Check if the class belongs to the classes we want to generate DTO for.
+	 * 
+	 * @param clazz
+	 *            the class to check.
+	 * @return <code>true</code> if the classes list contains the class.
+	 */
+	protected boolean isClassToGenerate(final Class<?> clazz) {
 		return this.classesToGenerate.contains(clazz);
 	}
 
-	protected String getDTOFieldType(Class<?> clazz, Field field) {
+	/**
+	 * Return the type of the DTO field class that belongs to the class given.
+	 * 
+	 * @param clazz
+	 *            the class that contains the field.
+	 * @param field
+	 *            the field we want to know its DTO type.
+	 * @return the type.
+	 */
+	protected String getDTOFieldType(final Class<?> clazz, final Field field) {
 		String fieldType = field.getType().getSimpleName();
 		if (this.isClassToGenerate(field.getType())) {
 			fieldType += "DTO";
@@ -97,7 +149,16 @@ public class DTOGeneratorImpl implements DTOGenerator {
 		return fieldType;
 	}
 
-	protected String getDTOFieldPackage(Class<?> clazz, Field field) {
+	/**
+	 * Return the DTO field package class that belongs to the class given.
+	 * 
+	 * @param clazz
+	 *            the class that contains the field.
+	 * @param field
+	 *            the field we want to know its DTO package.
+	 * @return the type.
+	 */
+	protected String getDTOFieldPackage(final Class<?> clazz, final Field field) {
 		Package fieldPackage = field.getType().getPackage();
 		String result = "";
 		if (fieldPackage != null && !"java.lang".equals(fieldPackage.getName())) {
@@ -113,7 +174,16 @@ public class DTOGeneratorImpl implements DTOGenerator {
 		return result;
 	}
 
-	protected FileWriter getDTOClassFileWriter(Class<?> clazz)
+	/**
+	 * Return the file writer used to write the DTO for the class given.
+	 * 
+	 * @param clazz
+	 *            the class we want to generate a DTO for.
+	 * @return the file write associated to the DTO.
+	 * @throws IOException
+	 *             if the file is not writable.
+	 */
+	protected FileWriter getDTOClassFileWriter(final Class<?> clazz)
 			throws IOException {
 		if (!this.fileWriters.containsKey(clazz)) {
 			String directory = this.generatedDirectory.getAbsolutePath()
@@ -122,12 +192,14 @@ public class DTOGeneratorImpl implements DTOGenerator {
 			File classFile = new File(directory.concat(File.separator)
 					.concat(clazz.getSimpleName()).concat("DTO.java"));
 			if (classFile.exists()) {
-				classFile.delete();
-			}
-			boolean fileCreated = classFile.createNewFile();
-			if (!fileCreated) {
-				throw new IOException("The file " + classFile
-						+ " can not be created.");
+				boolean fileDeleted = classFile.delete();
+				if (fileDeleted) {
+					boolean fileCreated = classFile.createNewFile();
+					if (!fileCreated) {
+						throw new IOException("The file " + classFile
+								+ " can not be created.");
+					}
+				}
 			}
 			FileWriter fw = new FileWriter(classFile);
 			this.fileWriters.put(clazz, fw);
@@ -137,16 +209,18 @@ public class DTOGeneratorImpl implements DTOGenerator {
 		}
 	}
 
-	protected void makeDTOClass(Class<?> clazz) throws IOException {
+	/**
+	 * Write class part in the DTO generation file.
+	 * 
+	 * @param clazz
+	 *            the clazz we want a DTO for.
+	 * @throws IOException
+	 *             if the file is not writable.
+	 */
+	protected void makeDTOClass(final Class<?> clazz) throws IOException {
 		FileWriter fw = this.getDTOClassFileWriter(clazz);
 		fw.write("package " + this.getDTOPackage(clazz) + ";" + "\n\n");
 		fw.write("import java.io.Serializable;\n\n");
-
-		/**
-		 * This class was generated by Apache CXF 2.4.1
-		 * 2011-07-19T22:38:12.464+02:00 Generated source version: 2.4.1
-		 * 
-		 */
 
 		fw.write("/**\n");
 		fw.write(" * This class was generated by the DTO Maven Plugin.\n");
@@ -167,7 +241,18 @@ public class DTOGeneratorImpl implements DTOGenerator {
 		fw.write("}");
 	}
 
-	protected void makeDTOField(Class<?> clazz, Field field) throws IOException {
+	/**
+	 * Write field part in the DTO generation file.
+	 * 
+	 * @param clazz
+	 *            the clazz we want a DTO for.
+	 * @param field
+	 *            the field we want to write the part for.
+	 * @throws IOException
+	 *             if the file is not writable.
+	 */
+	protected void makeDTOField(final Class<?> clazz, final Field field)
+			throws IOException {
 		FileWriter fw = this.getDTOClassFileWriter(clazz);
 		String fieldPackage = this.getDTOFieldPackage(clazz, field);
 		String fieldType = this.getDTOFieldType(clazz, field);
@@ -180,7 +265,17 @@ public class DTOGeneratorImpl implements DTOGenerator {
 
 	}
 
-	protected void makeDTOFieldGetter(Class<?> clazz, Field field)
+	/**
+	 * Write field getter part in the DTO generation file.
+	 * 
+	 * @param clazz
+	 *            the clazz we want a DTO for.
+	 * @param field
+	 *            the field we want to write the part for.
+	 * @throws IOException
+	 *             if the file is not writable.
+	 */
+	protected void makeDTOFieldGetter(final Class<?> clazz, final Field field)
 			throws IOException {
 		FileWriter fw = this.getDTOClassFileWriter(clazz);
 		String methodSignature;
@@ -205,7 +300,17 @@ public class DTOGeneratorImpl implements DTOGenerator {
 		fw.write("\t}\n\n");
 	}
 
-	protected void makeDTOFieldSetter(Class<?> clazz, Field field)
+	/**
+	 * Write field setter part in the DTO generation file.
+	 * 
+	 * @param clazz
+	 *            the clazz we want a DTO for.
+	 * @param field
+	 *            the field we want to write the part for.
+	 * @throws IOException
+	 *             if the file is not writable.
+	 */
+	protected void makeDTOFieldSetter(final Class<?> clazz, final Field field)
 			throws IOException {
 		FileWriter fw = this.getDTOClassFileWriter(clazz);
 		char firstCharacter = field.getName().charAt(0);
