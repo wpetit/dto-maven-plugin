@@ -17,10 +17,10 @@ import java.util.List;
 public class ClassFinderImpl implements ClassFinder {
 
 	/**
+	 * 
 	 * {@inheritDoc}
 	 * 
-	 * @throws ClassNotFoundException
-	 * @see fr.maven.dto.generator.ClassFinder#getClassesToGenerate(java.lang.String[])
+	 * @see fr.maven.dto.generator.ClassFinder#getClassesToGenerate(java.util.List)
 	 */
 	@Override
 	public List<Class<?>> getClassesToGenerate(final List<String> includeClasses)

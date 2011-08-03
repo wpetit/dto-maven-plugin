@@ -86,6 +86,11 @@
 					<reportPlugins>
 						<plugin>
 							<groupId>org.apache.maven.plugins</groupId>
+							<artifactId>maven-jxr-plugin</artifactId>
+							<version>2.3</version>
+						</plugin>
+						<plugin>
+							<groupId>org.apache.maven.plugins</groupId>
 							<artifactId>maven-project-info-reports-plugin</artifactId>
 							<version>2.4</version>
 						</plugin>
@@ -114,6 +119,14 @@
 								<formats>
 									<format>xml</format>
 								</formats>
+								<instrumentation>
+									<ignores>
+										<ignore>fr.maven.dto.HelpMojo</ignore>
+									</ignores>
+									<excludes>
+										<exclude>fr/maven/dto/**Test.class</exclude>
+									</excludes>
+								</instrumentation>
 							</configuration>
 						</plugin>
 						<plugin>
