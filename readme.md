@@ -28,8 +28,8 @@ Add the dto-maven-plugin in the build plugins of your pom.xml and let's go:
               <sourceRoot>target/generated</sourceRoot>
               <!-- The list of classes you want to generate DTO classes for.
               <includes>
-                <include>fr.example.Bean</include>
-                <include>fr.example.AnotherBean</include>
+                <include>fr.package.Bean</include>
+                <include>fr.package.**.AnotherBean</include>
               </includes>
             </configuration>
           </plugin>
