@@ -1,17 +1,21 @@
 /**
  * 
  */
-package fr.maven.dto.generator;
+package fr.maven.dto.generator.impl;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.junit.Before;
 import org.junit.Test;
+
+import fr.maven.dto.generator.ClassFinder;
+import fr.maven.dto.generator.impl.ClassFinderImpl;
 
 /**
  * @author Wilfried Petit
@@ -28,11 +32,11 @@ public class ClassFinderTest {
 
 	/**
 	 * Test method for
-	 * {@link fr.maven.dto.generator.ClassFinderImpl#getClassesToGenerate(java.lang.String[])}
+	 * {@link fr.maven.dto.generator.impl.ClassFinderImpl#getClassesToGenerate(java.lang.String[])}
 	 * .
 	 */
 	@Test
-	public void testGetClassesToGenerateWithValidPattern() {
+	public void testGetClassesToGenerateWithValidClasses() {
 		try {
 			List<String> includeClasses = new ArrayList<String>();
 			includeClasses.add("fr.maven.dto.bean.Bean");
@@ -59,11 +63,11 @@ public class ClassFinderTest {
 
 	/**
 	 * Test method for
-	 * {@link fr.maven.dto.generator.ClassFinderImpl#getClassesToGenerate(java.lang.String[])}
+	 * {@link fr.maven.dto.generator.impl.ClassFinderImpl#getClassesToGenerate(java.lang.String[])}
 	 * .
 	 */
 	@Test
-	public void testGetClassesToGenerateWithInvalidPattern() {
+	public void testGetClassesToGenerateWithInvalidClasses() {
 		List<String> includeClasses = new ArrayList<String>();
 		includeClasses.add("fr.maven.dto.invalid.InvalidBean");
 		try {
@@ -86,6 +90,42 @@ public class ClassFinderTest {
 			assertTrue("Exception is not a ClassNotFoundException",
 					e instanceof ClassNotFoundException);
 		}
+	}
 
+	/**
+	 * Test method for
+	 * {@link fr.maven.dto.generator.impl.ClassFinderImpl#getClassesToGenerate(List, String[], String[])
+	 * .
+	 */
+	@Test
+	public void testGetClassesToGenerateWithValidPattern() {
+		List<String> includes = new ArrayList<String>();
+		includes.add("**.Bean2");
+		includes.add("**.Bean");
+		List<File> baseDirectories = new ArrayList<File>();
+		baseDirectories
+				.add(new File("target" + File.separator + "test-classes"));
+		baseDirectories
+				.add(new File(
+						"C:/Users/minimoi/.m2/repository/org/apache/maven/maven-plugin-api/2.0/maven-plugin-api-2.0.jar"));
+		try {
+			List<Class<?>> classesFound = this.classFinder
+					.getClassesToGenerate(this.getClass().getClassLoader(),
+							baseDirectories, includes, new ArrayList<String>());
+			boolean classBeanFound = false;
+			boolean classBean2Found = false;
+			for (Class<?> clazz : classesFound) {
+				if ("fr.maven.dto.bean.Bean".equals(clazz.getCanonicalName())) {
+					classBeanFound = true;
+				}
+				if ("fr.maven.dto.bean.Bean2".equals(clazz.getCanonicalName())) {
+					classBean2Found = true;
+				}
+			}
+			assertTrue("Class Bean has not been found.", classBeanFound);
+			assertTrue("Class Bean2 has not been found.", classBean2Found);
+		} catch (ClassNotFoundException e) {
+			fail("testGetClassesToGenerateWithValidPattern failed, classes not found with valid pattern.");
+		}
 	}
 }

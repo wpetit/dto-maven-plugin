@@ -20,10 +20,10 @@
         <configuration>
           <!-- The directory where the DTO classes will be generated, default value is target/generated -->
           <sourceRoot>target/generated</sourceRoot>
-          <!-- The list of classes you want to generate DTO classes for.
+          <!-- The list of classes you want to generate DTO classes for. -->
           <includes>
-            <include>fr.example.Bean</include>
-            <include>fr.example.AnotherBean</include>
+            <include>fr.package.Bean</include>
+            <include>fr.package.**.AnotherBean</include>
           </includes>
         </configuration>
       </plugin>

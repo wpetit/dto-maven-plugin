@@ -1,7 +1,7 @@
 /**
  * 
  */
-package fr.maven.dto.generator;
+package fr.maven.dto.generator.impl;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -21,7 +21,6 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import fr.maven.dto.DTOLauncher;
 import fr.maven.dto.bean.Bean;
 import fr.maven.dto.bean.Bean2;
 
@@ -54,7 +53,7 @@ public class DTOGeneratorImplTest {
 
 	/**
 	 * Test method for
-	 * {@link fr.maven.dto.generator.DTOGeneratorImpl#generateDTOs(java.util.List)}
+	 * {@link fr.maven.dto.generator.impl.DTOGeneratorImpl#generateDTOs(java.util.List)}
 	 * .
 	 */
 	@Test
@@ -105,7 +104,7 @@ public class DTOGeneratorImplTest {
 
 	/**
 	 * Test method for
-	 * {@link fr.maven.dto.generator.DTOGeneratorImpl#generateDTO(java.lang.Class)}
+	 * {@link fr.maven.dto.generator.impl.DTOGeneratorImpl#generateDTO(java.lang.Class)}
 	 * .
 	 */
 	@Test
@@ -153,7 +152,7 @@ public class DTOGeneratorImplTest {
 
 	/**
 	 * Test method for
-	 * {@link fr.maven.dto.generator.DTOGeneratorImpl#getDTOPackage(java.lang.Class)}
+	 * {@link fr.maven.dto.generator.impl.DTOGeneratorImpl#getDTOPackage(java.lang.Class)}
 	 * .
 	 */
 	@Test
@@ -165,7 +164,7 @@ public class DTOGeneratorImplTest {
 
 	/**
 	 * Test method for
-	 * {@link fr.maven.dto.generator.DTOGeneratorImpl#isClassToGenerate(java.lang.Class)}
+	 * {@link fr.maven.dto.generator.impl.DTOGeneratorImpl#isClassToGenerate(java.lang.Class)}
 	 * .
 	 */
 	@Test
@@ -177,7 +176,7 @@ public class DTOGeneratorImplTest {
 
 	/**
 	 * Test method for
-	 * {@link fr.maven.dto.generator.DTOGeneratorImpl#isClassToGenerate(java.lang.Class)}
+	 * {@link fr.maven.dto.generator.impl.DTOGeneratorImpl#isClassToGenerate(java.lang.Class)}
 	 * .
 	 */
 	@Test
@@ -188,7 +187,7 @@ public class DTOGeneratorImplTest {
 
 	/**
 	 * Test method for
-	 * {@link fr.maven.dto.generator.DTOGeneratorImpl#getDTOFieldType(java.lang.Class, java.lang.reflect.Field)}
+	 * {@link fr.maven.dto.generator.impl.DTOGeneratorImpl#getDTOFieldType(java.lang.Class, java.lang.reflect.Field)}
 	 * .
 	 */
 	@Test
@@ -208,7 +207,7 @@ public class DTOGeneratorImplTest {
 
 	/**
 	 * Test method for
-	 * {@link fr.maven.dto.generator.DTOGeneratorImpl#getDTOFieldPackage(java.lang.Class, java.lang.reflect.Field)}
+	 * {@link fr.maven.dto.generator.impl.DTOGeneratorImpl#getDTOFieldPackage(java.lang.Class, java.lang.reflect.Field)}
 	 * .
 	 */
 	@Test
@@ -228,7 +227,7 @@ public class DTOGeneratorImplTest {
 
 	/**
 	 * Test method for
-	 * {@link fr.maven.dto.generator.DTOGeneratorImpl#getDTOClassFileWriter(java.lang.Class)}
+	 * {@link fr.maven.dto.generator.impl.DTOGeneratorImpl#getDTOClassFileWriter(java.lang.Class)}
 	 * .
 	 */
 	@Test
@@ -249,7 +248,7 @@ public class DTOGeneratorImplTest {
 
 	/**
 	 * Test method for
-	 * {@link fr.maven.dto.generator.DTOGeneratorImpl#makeDTOPackage(java.lang.Class)}
+	 * {@link fr.maven.dto.generator.impl.DTOGeneratorImpl#makeDTOPackage(java.lang.Class)}
 	 * .
 	 */
 	@Test
@@ -282,7 +281,7 @@ public class DTOGeneratorImplTest {
 
 	/**
 	 * Test method for
-	 * {@link fr.maven.dto.generator.DTOGeneratorImpl#makeDTOClass(java.lang.Class)}
+	 * {@link fr.maven.dto.generator.impl.DTOGeneratorImpl#makeDTOClass(java.lang.Class)}
 	 * .
 	 */
 	@Test
@@ -312,7 +311,7 @@ public class DTOGeneratorImplTest {
 
 	/**
 	 * Test method for
-	 * {@link fr.maven.dto.generator.DTOGeneratorImpl#makeDTOField(java.lang.Class, java.lang.reflect.Field)}
+	 * {@link fr.maven.dto.generator.impl.DTOGeneratorImpl#makeDTOField(java.lang.Class, java.lang.reflect.Field)}
 	 * .
 	 */
 	@Test
@@ -348,7 +347,7 @@ public class DTOGeneratorImplTest {
 
 	/**
 	 * Test method for
-	 * {@link fr.maven.dto.generator.DTOGeneratorImpl#makeDTOFieldGetter(java.lang.Class, java.lang.reflect.Field)}
+	 * {@link fr.maven.dto.generator.impl.DTOGeneratorImpl#makeDTOFieldGetter(java.lang.Class, java.lang.reflect.Field)}
 	 * .
 	 */
 	@Test
@@ -384,7 +383,7 @@ public class DTOGeneratorImplTest {
 
 	/**
 	 * Test method for
-	 * {@link fr.maven.dto.generator.DTOGeneratorImpl#makeDTOFieldSetter(java.lang.Class, java.lang.reflect.Field)}
+	 * {@link fr.maven.dto.generator.impl.DTOGeneratorImpl#makeDTOFieldSetter(java.lang.Class, java.lang.reflect.Field)}
 	 * .
 	 */
 	@Test
@@ -430,25 +429,4 @@ public class DTOGeneratorImplTest {
 			file.delete();
 		}
 	}
-
-	/**
-	 * 
-	 */
-	public static void main(String[] args) {
-		try {
-			List<String> includeClasses = new ArrayList<String>();
-			includeClasses.add("fr.maven.dto.bean.AnotherBean");
-			includeClasses.add("fr.maven.dto.bean.Bean2");
-			includeClasses.add("fr.maven.dto.bean.Bean");
-			includeClasses.add("fr.maven.dto.bean.BeanExaple");
-
-			new DTOLauncher().execute(new File("target\\generated"),
-					includeClasses);
-		} catch (IOException e) {
-			e.printStackTrace();
-		} catch (ClassNotFoundException e) {
-			e.printStackTrace();
-		}
-	}
-
 }

@@ -1,10 +1,9 @@
 package fr.maven.dto;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.security.AccessController;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -12,6 +11,9 @@ import java.util.Set;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
+
+import fr.maven.dto.generator.ClassLoaderProvider;
+import fr.maven.dto.generator.impl.ClassLoaderProviderImpl;
 
 /**
  * Mojo to generate DTO classes.
@@ -44,7 +46,7 @@ public class DTOMojo extends AbstractMojo {
 	/**
 	 * Location of the project build directory.
 	 * 
-	 * @parameter expression="${project.build.directory}"
+	 * @parameter expression="${project.build.outputDirectory}"
 	 * @required
 	 */
 	private File outputDirectory;
@@ -52,20 +54,25 @@ public class DTOMojo extends AbstractMojo {
 	/**
 	 * Location of the DTO classes generation directory.
 	 * 
-	 * @parameter expression="${sourceRoot}"
+	 * @parameter expression="${generatedDirectory}"
 	 *            default-value="${project.build.directory}/generated"
 	 * @required
 	 */
 	private File generatedDirectory;
 
 	/**
-	 * List of classes we want to generate DTO for.
+	 * List of pattern classes we want to generate DTO for match.
 	 * 
-	 * @parameter expression="${includeClasses}"
-	 * 
-	 * @required
+	 * @parameter expression="${includes}"
 	 */
-	private List<String> includeClasses;
+	private List<String> includes;
+
+	/**
+	 * List of pattern classes we do not want to generate DTO for match.
+	 * 
+	 * @parameter expression="${excludes}"
+	 */
+	private List<String> excludes;
 
 	/**
 	 * {@inheritDoc}
@@ -81,28 +88,13 @@ public class DTOMojo extends AbstractMojo {
 			throw new MojoExecutionException(
 					"Generation aborted due to previous errors.");
 		}
-
 		try {
-			// Get classes to generate DTO for
-			StringBuffer classes = new StringBuffer();
-			for (String clazz : this.includeClasses) {
-				classes.append(clazz + ";");
-			}
-
-			// Generate the process to launch
-			String cmd = "java -classpath "
-					+ this.getClasspath(this.outputDirectory) + " "
-					+ DTOLauncher.class.getCanonicalName() + " "
-					+ this.generatedDirectory + " " + classes;
-
-			this.getLog().debug("dto-maven-plugin launching " + cmd);
-
-			// Get process result
-			int exitValue = this.runProcess(cmd);
-			if (exitValue != 0) {
-				this.getLog().error("The generation has failed.");
-				throw new MojoExecutionException("The generation has failed.");
-			}
+			this.getLog().debug("dto-maven-plugin launch the generation.");
+			DTOLauncher dtoLauncher = new DTOLauncher();
+			dtoLauncher.execute(this.getClassLoader(this.outputDirectory),
+					this.getBaseDirectories(), this.includes, this.excludes,
+					this.generatedDirectory);
+			this.getLog().debug("dto-maven-plugin finished the generation.");
 		} catch (Exception e) {
 			this.getLog().error("The generation has failed.", e);
 			throw new MojoExecutionException("The generation has failed.", e);
@@ -115,95 +107,53 @@ public class DTOMojo extends AbstractMojo {
 	 * @param directory
 	 *            the directory that contains classes.
 	 * @return the classpath result.
+	 * @throws MalformedURLException
+	 *             if the creation of url for files found failed
 	 */
-	protected String getClasspath(File directory) {
-		this.getLog().debug("Begin classpath resolution");
-		StringBuffer classpath = new StringBuffer();
-		for (File clazz : this.getFiles(directory)) {
-			classpath.append(clazz.getAbsolutePath() + File.pathSeparator);
-		}
+	protected ClassLoader getClassLoader(File directory)
+			throws MalformedURLException {
+		this.getLog().debug("Begin classloader creation");
+
+		List<URL> urlList = new ArrayList<URL>();
+
+		urlList.add(directory.toURI().toURL());
 		for (Artifact artifact : this.pluginArtifacts) {
-			classpath.append(artifact.getFile().getAbsolutePath()
-					+ File.pathSeparator);
+			urlList.add(artifact.getFile().toURI().toURL());
 		}
 		for (Artifact artifact : this.projectDependencies) {
 			if (artifact.getFile() != null) {
-				classpath.append(artifact.getFile().getAbsolutePath()
-						+ File.pathSeparator);
+				urlList.add(artifact.getFile().toURI().toURL());
 			}
 		}
 
-		classpath.append(";.");
-		this.getLog().debug("End classpath resolution");
-		return classpath.toString();
+		ClassLoaderProvider classLoaderProvider = new ClassLoaderProviderImpl(
+				urlList.toArray(new URL[0]));
+		AccessController.doPrivileged(classLoaderProvider);
+		ClassLoader urlClassLoader = classLoaderProvider.getClassLoader();
+
+		this.getLog().debug("End classloader creation");
+		return urlClassLoader;
 	}
 
 	/**
-	 * Return all classes found in the directory given.
+	 * Return all base directories or archive where classes can been found.
 	 * 
-	 * @param file
-	 *            the directory where classes to found are.
-	 * @return the list of classes found.
+	 * @param classesDirectory
+	 *            the classes directory.
+	 * @return the list of directories and archive found.
 	 */
-	protected List<File> getFiles(File file) {
-		this.getLog().debug("Begin classes listing");
-		List<File> classFiles = new ArrayList<File>();
-		if (file.exists()) {
-			if (file.isDirectory()) {
-				for (File childFile : file.listFiles()) {
-					classFiles.addAll(this.getFiles(childFile));
-				}
-			} else if (file.getAbsolutePath().endsWith(".class")) {
-				classFiles.add(file);
-			}
+	protected List<File> getBaseDirectories() {
+		this.getLog().debug("Begin classes containers listing");
+		List<File> directoriesOrArchive = new ArrayList<File>();
+		directoriesOrArchive.add(this.outputDirectory);
+		for (Artifact artifact : this.pluginArtifacts) {
+			directoriesOrArchive.add(artifact.getFile());
 		}
-		this.getLog().debug("End classes listing");
-		return classFiles;
-	}
-
-	/**
-	 * Run the process of the given command.
-	 * 
-	 * @param cmd
-	 *            the command to launch
-	 * @return the process result.
-	 * @throws IOException
-	 *             if an I/O error occurs
-	 * @throws InterruptedException
-	 *             if the current thread is interrupted by another thread while
-	 *             it is waiting, then the wait is ended and an
-	 *             InterruptedException is thrown.
-	 */
-	protected int runProcess(String cmd) throws IOException,
-			InterruptedException {
-		this.getLog().debug("Begin running process");
-		Process process = Runtime.getRuntime().exec(cmd);
-
-		// Redirect error stream to logs
-		InputStream stdErr = process.getErrorStream();
-		InputStreamReader isrErr = new InputStreamReader(stdErr);
-		BufferedReader brErr = new BufferedReader(isrErr);
-		String lineErr = null;
-		while ((lineErr = brErr.readLine()) != null) {
-			this.getLog().error(lineErr);
+		for (Artifact artifact : this.projectDependencies) {
+			directoriesOrArchive.add(artifact.getFile());
 		}
-
-		// Redirect input stream to logs
-		InputStream stdIn = process.getInputStream();
-		InputStreamReader isrIn = new InputStreamReader(stdIn);
-		BufferedReader brIn = new BufferedReader(isrIn);
-		String lineIn = null;
-		while ((lineIn = brIn.readLine()) != null) {
-			this.getLog().error(lineIn);
-		}
-		int exitValue = process.waitFor();
-
-		brErr.close();
-		brIn.close();
-
-		this.getLog().debug("End running process");
-
-		return exitValue;
+		this.getLog().debug("End classes containers listing");
+		return directoriesOrArchive;
 	}
 
 	/**
@@ -215,7 +165,7 @@ public class DTOMojo extends AbstractMojo {
 	protected boolean checkArgs() {
 		boolean argsValid = true;
 		// Check there are classes to generate.
-		if (this.includeClasses == null || this.includeClasses.isEmpty()) {
+		if (this.includes == null || this.includes.isEmpty()) {
 			this.getLog()
 					.warn("No classes to generate. Please check the plugin configuration.");
 			argsValid = false;
@@ -223,7 +173,7 @@ public class DTOMojo extends AbstractMojo {
 		// Check classes are compiled before generation.
 		if (this.outputDirectory == null || !this.outputDirectory.exists()) {
 			this.getLog()
-					.warn("Output directory does not exists. Please check the classes you want to generate DTOs for has been compiled.");
+					.warn("Output directory does not exists. Please check the classes you want to generate DTOs for have been compiled.");
 			argsValid = false;
 		}
 		return argsValid;

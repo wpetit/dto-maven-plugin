@@ -1,18 +1,21 @@
 /**
  * 
  */
-package fr.maven.dto.generator;
+package fr.maven.dto.generator.impl;
 
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import fr.maven.dto.generator.DTOGenerator;
 
 /**
  * {@link DTOGenerator} implementation.
@@ -59,8 +62,6 @@ public class DTOGeneratorImpl implements DTOGenerator {
 	/**
 	 * {@inheritDoc}
 	 * 
-	 * @throws IOException
-	 * 
 	 * @see fr.maven.dto.generator.DTOGenerator#generateDTOs(java.util.List)
 	 */
 	@Override
@@ -72,7 +73,6 @@ public class DTOGeneratorImpl implements DTOGenerator {
 	}
 
 	/**
-	 * 
 	 * {@inheritDoc}
 	 * 
 	 * @see fr.maven.dto.generator.DTOGenerator#generateDTO(java.lang.Class)
@@ -232,11 +232,15 @@ public class DTOGeneratorImpl implements DTOGenerator {
 				+ "DTO implements Serializable {\n\n");
 		fw.write("\tprivate static final long serialVersionUID = 1L;\n\n");
 		for (Field field : clazz.getDeclaredFields()) {
-			this.makeDTOField(clazz, field);
+			if (!Modifier.isStatic(field.getModifiers())) {
+				this.makeDTOField(clazz, field);
+			}
 		}
 		for (Field field : clazz.getDeclaredFields()) {
-			this.makeDTOFieldGetter(clazz, field);
-			this.makeDTOFieldSetter(clazz, field);
+			if (!Modifier.isStatic(field.getModifiers())) {
+				this.makeDTOFieldGetter(clazz, field);
+				this.makeDTOFieldSetter(clazz, field);
+			}
 		}
 		fw.write("}");
 	}
