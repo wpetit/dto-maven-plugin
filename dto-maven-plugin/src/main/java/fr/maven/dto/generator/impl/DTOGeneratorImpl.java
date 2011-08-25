@@ -283,15 +283,19 @@ public class DTOGeneratorImpl implements DTOGenerator {
 			throws IOException {
 		FileWriter fw = this.getDTOClassFileWriter(clazz);
 		String methodSignature;
-		char firstCharacter = field.getName().charAt(0);
+		char firstFieldNameCharacterUpper = Character.toUpperCase(field
+				.getName().charAt(0));
+		String fieldNameWithoutFirstCharacter = "";
+		if (field.getName().length() > 1) {
+			fieldNameWithoutFirstCharacter = field.getName().substring(1);
+		}
 		if (field.getType().equals(boolean.class)) {
-			methodSignature = "is"
-					+ field.getName().replace(field.getName().charAt(0),
-							Character.toUpperCase(firstCharacter));
+			methodSignature = "is" + firstFieldNameCharacterUpper
+					+ fieldNameWithoutFirstCharacter;
 		} else {
-			methodSignature = "get"
-					+ field.getName().replace(field.getName().charAt(0),
-							Character.toUpperCase(firstCharacter));
+
+			methodSignature = "get" + firstFieldNameCharacterUpper
+					+ fieldNameWithoutFirstCharacter;
 		}
 		fw.write("\t/**\n");
 		fw.write("\t * @see " + clazz.getCanonicalName() + "#"
@@ -317,10 +321,15 @@ public class DTOGeneratorImpl implements DTOGenerator {
 	protected void makeDTOFieldSetter(final Class<?> clazz, final Field field)
 			throws IOException {
 		FileWriter fw = this.getDTOClassFileWriter(clazz);
-		char firstCharacter = field.getName().charAt(0);
-		String methodSignature = "set"
-				+ field.getName().replace(field.getName().charAt(0),
-						Character.toUpperCase(firstCharacter));
+
+		char firstFieldNameCharacterUpper = Character.toUpperCase(field
+				.getName().charAt(0));
+		String fieldNameWithoutFirstCharacter = "";
+		if (field.getName().length() > 1) {
+			fieldNameWithoutFirstCharacter = field.getName().substring(1);
+		}
+		String methodSignature = "set" + firstFieldNameCharacterUpper
+				+ fieldNameWithoutFirstCharacter;
 		fw.write("\t/**\n");
 		fw.write("\t * @see " + clazz.getCanonicalName() + "#"
 				+ methodSignature + "(" + field.getType().getSimpleName()
