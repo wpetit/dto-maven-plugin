@@ -3,6 +3,8 @@
  */
 package fr.maven.dto.bean;
 
+import java.util.List;
+
 /**
  * @author Wilfried Petit
  * 
@@ -10,6 +12,12 @@ package fr.maven.dto.bean;
 public class Bean2 {
 
 	private Bean bean;
+
+	private List<Bean> beans;
+
+	private List<List<Bean>> beansList;
+
+	private List<String> strings;
 
 	/**
 	 * @return the bean

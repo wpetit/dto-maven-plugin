@@ -122,8 +122,11 @@ public class DTOGeneratorImplTest {
 			boolean validPackage = false;
 			boolean validClass = false;
 			boolean validField = false;
+			boolean validGenericField = false;
 			boolean validFieldGetter = false;
+			boolean validGenericFieldGetter = false;
 			boolean validFieldSetter = false;
+			boolean validGenericFieldSetter = false;
 			while ((line = bf.readLine()) != null) {
 				if ("package fr.maven.dto.bean.dto;".equals(line)) {
 					validPackage = true;
@@ -132,10 +135,19 @@ public class DTOGeneratorImplTest {
 					validClass = true;
 				} else if ("\tprivate BeanDTO bean;".equals(line)) {
 					validField = true;
+				} else if ("\tprivate java.util.List<BeanDTO> beans;"
+						.equals(line)) {
+					validGenericField = true;
 				} else if ("\tpublic BeanDTO getBean() {".equals(line)) {
 					validFieldGetter = true;
+				} else if ("\tpublic java.util.List<BeanDTO> getBeans() {"
+						.equals(line)) {
+					validGenericFieldGetter = true;
 				} else if ("\tpublic void setBean(BeanDTO bean) {".equals(line)) {
 					validFieldSetter = true;
+				} else if ("\tpublic void setBeans(java.util.List<BeanDTO> beans) {"
+						.equals(line)) {
+					validGenericFieldSetter = true;
 				}
 			}
 			bf.close();
@@ -143,8 +155,13 @@ public class DTOGeneratorImplTest {
 			assertTrue("Package generated not valid", validPackage);
 			assertTrue("Class generated not valid", validClass);
 			assertTrue("Field generated not valid", validField);
+			assertTrue("Generic Field generated not valid", validGenericField);
 			assertTrue("Field getter generated not valid", validFieldGetter);
+			assertTrue("Generic Field getter generated not valid",
+					validGenericFieldGetter);
 			assertTrue("Field setter generated not valid", validFieldSetter);
+			assertTrue("Generic Field setter generated not valid",
+					validGenericFieldSetter);
 		} catch (IOException e) {
 			fail("The class has not been generated (could not write or read file).");
 		}
@@ -217,7 +234,8 @@ public class DTOGeneratorImplTest {
 			assertEquals(
 					"getFieldPackage does not result \"\" for attribut1 field",
 					"",
-					this.dtoGeneratorImpl.getDTOFieldPackage(Bean.class, field));
+					this.dtoGeneratorImpl.getDTOFieldPackage(Bean.class,
+							field.getGenericType()));
 		} catch (SecurityException e) {
 			fail("Field attribut1 not accessible.");
 		} catch (NoSuchFieldException e) {

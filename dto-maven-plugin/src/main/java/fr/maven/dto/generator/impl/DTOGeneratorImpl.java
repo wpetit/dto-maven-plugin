@@ -8,6 +8,8 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -139,14 +141,46 @@ public class DTOGeneratorImpl implements DTOGenerator {
 	 * @return the type.
 	 */
 	protected String getDTOFieldType(final Class<?> clazz, final Field field) {
-		String fieldType = field.getType().getSimpleName();
-		if (this.isClassToGenerate(field.getType())) {
-			fieldType += "DTO";
+		return this.getDTOType(clazz, field.getGenericType());
+	}
+
+	/**
+	 * Return the type canonical name for the field type given.
+	 * 
+	 * @param clazz
+	 *            the class that contains the field.
+	 * @param type
+	 *            the field type.
+	 * @return the type canonical name.
+	 */
+	protected String getDTOType(final Class<?> clazz, final Type type) {
+		StringBuffer typeCanonicalName = new StringBuffer();
+		typeCanonicalName.append(this.getDTOFieldPackage(clazz, type));
+		if (type instanceof ParameterizedType) {
+			ParameterizedType parameterizedType = (ParameterizedType) type;
+			typeCanonicalName
+					.append(((Class<?>) parameterizedType.getRawType())
+							.getSimpleName() + "<");
+			Type[] typeArguments = parameterizedType.getActualTypeArguments();
+			for (int i = 0; i < typeArguments.length; i++) {
+				typeCanonicalName.append(this.getDTOType(clazz,
+						typeArguments[i]));
+				if (i != (typeArguments.length - 1)) {
+					typeCanonicalName.append(", ");
+				}
+			}
+			typeCanonicalName.append(">");
+		} else {
+			Class<?> clazzType = ((Class<?>) type);
+			typeCanonicalName.append(((Class<?>) type).getSimpleName());
+			if (this.isClassToGenerate(clazzType)) {
+				typeCanonicalName.append("DTO");
+			}
+			if (clazzType.isArray()) {
+				typeCanonicalName.append("[]");
+			}
 		}
-		if (field.getType().isArray()) {
-			fieldType += "[]";
-		}
-		return fieldType;
+		return typeCanonicalName.toString();
 	}
 
 	/**
@@ -154,21 +188,30 @@ public class DTOGeneratorImpl implements DTOGenerator {
 	 * 
 	 * @param clazz
 	 *            the class that contains the field.
-	 * @param field
-	 *            the field we want to know its DTO package.
+	 * @param fieldType
+	 *            the field type we want to know its DTO package.
 	 * @return the type.
 	 */
-	protected String getDTOFieldPackage(final Class<?> clazz, final Field field) {
-		Package fieldPackage = field.getType().getPackage();
+	protected String getDTOFieldPackage(final Class<?> clazz,
+			final Type fieldType) {
+		Class<?> fieldTypeClass;
+		Package fieldPackage;
+		if (fieldType instanceof ParameterizedType) {
+			fieldTypeClass = ((Class<?>) ((ParameterizedType) fieldType)
+					.getRawType());
+		} else {
+			fieldTypeClass = (Class<?>) fieldType;
+		}
+		fieldPackage = ((Class<?>) fieldTypeClass).getPackage();
 		String result = "";
 		if (fieldPackage != null && !"java.lang".equals(fieldPackage.getName())) {
-			if (this.isClassToGenerate(field.getType())) {
+			if (this.isClassToGenerate(fieldTypeClass)) {
 				if (!clazz.getPackage().getName()
-						.equals(field.getType().getPackage().getName())) {
-					result = this.getDTOPackage(field.getType()) + ".";
+						.equals(fieldTypeClass.getPackage().getName())) {
+					result = this.getDTOPackage(fieldTypeClass) + ".";
 				}
 			} else {
-				result = field.getType().getPackage().getName() + ".";
+				result = fieldTypeClass.getPackage().getName() + ".";
 			}
 		}
 		return result;
@@ -258,14 +301,12 @@ public class DTOGeneratorImpl implements DTOGenerator {
 	protected void makeDTOField(final Class<?> clazz, final Field field)
 			throws IOException {
 		FileWriter fw = this.getDTOClassFileWriter(clazz);
-		String fieldPackage = this.getDTOFieldPackage(clazz, field);
 		String fieldType = this.getDTOFieldType(clazz, field);
 		fw.write("\t/**\n");
 		fw.write("\t * @see " + clazz.getCanonicalName() + "#"
 				+ field.getName() + "\n");
 		fw.write("\t */\n");
-		fw.write("\tprivate " + fieldPackage + fieldType + " "
-				+ field.getName() + ";\n\n");
+		fw.write("\tprivate " + fieldType + " " + field.getName() + ";\n\n");
 
 	}
 
@@ -301,9 +342,8 @@ public class DTOGeneratorImpl implements DTOGenerator {
 		fw.write("\t * @see " + clazz.getCanonicalName() + "#"
 				+ methodSignature + "()\n");
 		fw.write("\t */\n");
-		fw.write("\tpublic " + this.getDTOFieldPackage(clazz, field)
-				+ this.getDTOFieldType(clazz, field) + " " + methodSignature
-				+ "() {\n");
+		fw.write("\tpublic " + this.getDTOFieldType(clazz, field) + " "
+				+ methodSignature + "() {\n");
 		fw.write("\t\treturn this." + field.getName() + ";\n");
 		fw.write("\t}\n\n");
 	}
@@ -336,7 +376,6 @@ public class DTOGeneratorImpl implements DTOGenerator {
 				+ ")\n");
 		fw.write("\t */\n");
 		fw.write("\tpublic void " + methodSignature + "("
-				+ this.getDTOFieldPackage(clazz, field)
 				+ this.getDTOFieldType(clazz, field) + " " + field.getName()
 				+ ") {\n");
 		fw.write("\t\tthis." + field.getName() + " = " + field.getName()

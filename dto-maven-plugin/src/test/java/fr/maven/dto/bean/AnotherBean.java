@@ -1,6 +1,7 @@
 package fr.maven.dto.bean;
 
 import java.util.Date;
+import java.util.List;
 
 /**
  * @author Wilfried Petit
@@ -10,6 +11,8 @@ public class AnotherBean {
 	private String attribut1;
 	private boolean attribut2;
 	private Date attribut3;
+
+	private List<String> attribut4;
 
 	/**
 	 * @return the attribut1
