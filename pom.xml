@@ -17,6 +17,15 @@
 		</developer>
 	</developers>
 
+	<issueManagement>
+		<url>https://github.com/wpetit/dto-maven-plugin/issues</url>
+	</issueManagement>
+
+	<scm>
+		<connection>scm:git://github.com/wpetit/dto-maven-plugin.git</connection>
+		<url>https://github.com/wpetit/dto-maven-plugin</url>
+	</scm>
+
 	<licenses>
 		<license>
 			<name>The Apache Software License, Version 2.0</name>
