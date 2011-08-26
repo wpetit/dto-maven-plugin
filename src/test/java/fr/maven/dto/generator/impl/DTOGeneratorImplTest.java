@@ -32,16 +32,21 @@ public class DTOGeneratorImplTest {
 	private File generatedDirectory;
 
 	/**
+	 * Set up configuration for generation.
+	 * 
 	 * @throws java.lang.Exception
 	 */
 	@Before
 	public void setUp() throws Exception {
 		this.dtoGeneratorImpl = new DTOGeneratorImpl();
-		this.generatedDirectory = new File("target\\generated");
+		this.generatedDirectory = new File("target" + File.separator
+				+ "generated");
 		this.dtoGeneratorImpl.setGeneratedDirectory(this.generatedDirectory);
 	}
 
 	/**
+	 * Tear down. Delete generated files.
+	 * 
 	 * @throws java.lang.Exception
 	 */
 	@After
