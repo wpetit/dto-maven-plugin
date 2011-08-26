@@ -9,7 +9,7 @@ import java.net.URLClassLoader;
 import fr.maven.dto.generator.ClassLoaderProvider;
 
 /**
- * ClassLoaderProvider provide ClassLoader from URLs in a security way.
+ * ClassLoaderProvider provides ClassLoader from URLs in a security way.
  * 
  * @author Wilfried Petit
  * 
