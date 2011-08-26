@@ -1,0 +1,5 @@
+<FindBugsFilter>
+  <Match>
+    <Class name="fr.maven.dto.HelpMojo" />
+  </Match>
+</FindBugsFilter>

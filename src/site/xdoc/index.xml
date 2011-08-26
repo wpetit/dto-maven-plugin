@@ -1,0 +1,34 @@
+<?xml version="1.0"?>
+<document xmlns="http://maven.apache.org/XDOC/2.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/XDOC/2.0 http://maven.apache.org/xsd/xdoc-2.0.xsd">
+  <properties>
+    <title>Welcome to DTO Maven Plugin</title>
+    <author email="petit.wilfried@gmail.Com">Wilfried Petit</author>
+  </properties>
+  <body>
+    <section name="Welcome to DTO Maven Plugin">
+      <p>DTO Maven Plugin generates DTO for Java Bean classes and avoid to write them manually.</p>
+      <p>Because it generates DTO from compiled classes. It can only generate DTO classes for Java Bean in your dependencies.</p>
+      
+      <h3>Usage</h3>
+      <p>General instructions on how to use the DTO Maven Plugin can be found on the <a href="usage.html">usage page.</a>. Some more
+  specific use cases are described in the examples given below.</p>
+      
+      <h3>Goals</h3>
+      <p>This plugin has 2 goals:</p>
+      <ul>
+        <li><a href="goal.html">dto:dto</a> generate DTO classes.</li>
+        <li><a href="goal.html">dto:help</a> displays help information on DTO Maven Plugin.</li>
+      </ul>
+      
+      <h3>Example</h3>
+      <p>To provide you with better understanding of some usages of the DTO Maven Plugin, you can take a look into the following examples:</p>
+      <ul>
+        <li><a href="configuration.html">Configuration example</a></li>
+        <li><a href="dto-generation.html">DTO generation example</a></li>
+      </ul>
+    </section>
+  </body>
+</document>
+
+ 	  	 
