@@ -3,11 +3,6 @@
  */
 package fr.maven.dto.generator.impl;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
@@ -18,6 +13,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.junit.After;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -25,6 +21,8 @@ import fr.maven.dto.bean.Bean;
 import fr.maven.dto.bean.Bean2;
 
 /**
+ * Tests on {@link DTOGeneratorImpl}.
+ * 
  * @author Wilfried Petit
  * 
  */
@@ -60,16 +58,17 @@ public class DTOGeneratorImplTest {
 	public void testGenerateDTOs() {
 		try {
 			this.dtoGeneratorImpl.classesToGenerate.add(Bean.class);
-			List<Class<?>> classesToGenerate = new ArrayList<Class<?>>();
+			final List<Class<?>> classesToGenerate = new ArrayList<Class<?>>();
 			classesToGenerate.add(Bean.class);
 			classesToGenerate.add(Bean2.class);
 			this.dtoGeneratorImpl.generateDTOs(classesToGenerate);
-			File file = new File(this.generatedDirectory.getAbsolutePath()
-					+ "\\fr\\maven\\dto\\bean\\dto\\Bean2DTO.java");
-			assertTrue("package has not been created", new File(
+			final File file = new File(
+					this.generatedDirectory.getAbsolutePath()
+							+ "\\fr\\maven\\dto\\bean\\dto\\Bean2DTO.java");
+			Assert.assertTrue("package has not been created", new File(
 					this.generatedDirectory.getAbsolutePath()
 							+ "\\fr\\maven\\dto\\bean\\dto").exists());
-			BufferedReader bf = new BufferedReader(new FileReader(file));
+			final BufferedReader bf = new BufferedReader(new FileReader(file));
 			String line;
 			boolean validPackage = false;
 			boolean validClass = false;
@@ -92,13 +91,15 @@ public class DTOGeneratorImplTest {
 			}
 			bf.close();
 			this.deleteFiles(file);
-			assertTrue("Package generated not valid", validPackage);
-			assertTrue("Class generated not valid", validClass);
-			assertTrue("Field generated not valid", validField);
-			assertTrue("Field getter generated not valid", validFieldGetter);
-			assertTrue("Field setter generated not valid", validFieldSetter);
-		} catch (IOException e) {
-			fail("The class has not been generated (could not write or read file).");
+			Assert.assertTrue("Package generated not valid", validPackage);
+			Assert.assertTrue("Class generated not valid", validClass);
+			Assert.assertTrue("Field generated not valid", validField);
+			Assert.assertTrue("Field getter generated not valid",
+					validFieldGetter);
+			Assert.assertTrue("Field setter generated not valid",
+					validFieldSetter);
+		} catch (final IOException e) {
+			Assert.fail("The class has not been generated (could not write or read file).");
 		}
 	}
 
@@ -112,12 +113,13 @@ public class DTOGeneratorImplTest {
 		try {
 			this.dtoGeneratorImpl.classesToGenerate.add(Bean.class);
 			this.dtoGeneratorImpl.generateDTO(Bean2.class);
-			File file = new File(this.generatedDirectory.getAbsolutePath()
-					+ "\\fr\\maven\\dto\\bean\\dto\\Bean2DTO.java");
-			assertTrue("package has not been created", new File(
+			final File file = new File(
+					this.generatedDirectory.getAbsolutePath()
+							+ "\\fr\\maven\\dto\\bean\\dto\\Bean2DTO.java");
+			Assert.assertTrue("package has not been created", new File(
 					this.generatedDirectory.getAbsolutePath()
 							+ "\\fr\\maven\\dto\\bean\\dto").exists());
-			BufferedReader bf = new BufferedReader(new FileReader(file));
+			final BufferedReader bf = new BufferedReader(new FileReader(file));
 			String line;
 			boolean validPackage = false;
 			boolean validClass = false;
@@ -152,18 +154,21 @@ public class DTOGeneratorImplTest {
 			}
 			bf.close();
 			this.deleteFiles(file);
-			assertTrue("Package generated not valid", validPackage);
-			assertTrue("Class generated not valid", validClass);
-			assertTrue("Field generated not valid", validField);
-			assertTrue("Generic Field generated not valid", validGenericField);
-			assertTrue("Field getter generated not valid", validFieldGetter);
-			assertTrue("Generic Field getter generated not valid",
+			Assert.assertTrue("Package generated not valid", validPackage);
+			Assert.assertTrue("Class generated not valid", validClass);
+			Assert.assertTrue("Field generated not valid", validField);
+			Assert.assertTrue("Generic Field generated not valid",
+					validGenericField);
+			Assert.assertTrue("Field getter generated not valid",
+					validFieldGetter);
+			Assert.assertTrue("Generic Field getter generated not valid",
 					validGenericFieldGetter);
-			assertTrue("Field setter generated not valid", validFieldSetter);
-			assertTrue("Generic Field setter generated not valid",
+			Assert.assertTrue("Field setter generated not valid",
+					validFieldSetter);
+			Assert.assertTrue("Generic Field setter generated not valid",
 					validGenericFieldSetter);
-		} catch (IOException e) {
-			fail("The class has not been generated (could not write or read file).");
+		} catch (final IOException e) {
+			Assert.fail("The class has not been generated (could not write or read file).");
 		}
 	}
 
@@ -174,8 +179,8 @@ public class DTOGeneratorImplTest {
 	 */
 	@Test
 	public void testGetDTOPackage() {
-		Class<?> clazz = Bean.class;
-		assertEquals("getPackageDTO failed", "fr.maven.dto.bean.dto",
+		final Class<?> clazz = Bean.class;
+		Assert.assertEquals("getPackageDTO failed", "fr.maven.dto.bean.dto",
 				this.dtoGeneratorImpl.getDTOPackage(clazz));
 	}
 
@@ -187,7 +192,8 @@ public class DTOGeneratorImplTest {
 	@Test
 	public void testIsClassToGenerateWithValidClass() {
 		this.dtoGeneratorImpl.classesToGenerate.add(Bean.class);
-		assertTrue("isClassToGenerate does not find Bean class but it should.",
+		Assert.assertTrue(
+				"isClassToGenerate does not find Bean class but it should.",
 				this.dtoGeneratorImpl.isClassToGenerate(Bean.class));
 	}
 
@@ -198,7 +204,8 @@ public class DTOGeneratorImplTest {
 	 */
 	@Test
 	public void testIsClassToGenerateWitnValidClass() {
-		assertFalse("isClassToGenerate found Bean class but it should not.",
+		Assert.assertFalse(
+				"isClassToGenerate found Bean class but it should not.",
 				this.dtoGeneratorImpl.isClassToGenerate(Bean.class));
 	}
 
@@ -210,15 +217,15 @@ public class DTOGeneratorImplTest {
 	@Test
 	public void testGetDTOFieldType() {
 		try {
-			Field field = Bean.class.getDeclaredField("attribut1");
-			assertEquals(
+			final Field field = Bean.class.getDeclaredField("attribut1");
+			Assert.assertEquals(
 					"getFieldType does not result String for attribut1 field",
 					"String",
 					this.dtoGeneratorImpl.getDTOFieldType(Bean.class, field));
-		} catch (SecurityException e) {
-			fail("Field attribut1 not accessible.");
-		} catch (NoSuchFieldException e) {
-			fail("Field attribut1 does not exists.");
+		} catch (final SecurityException e) {
+			Assert.fail("Field attribut1 not accessible.");
+		} catch (final NoSuchFieldException e) {
+			Assert.fail("Field attribut1 does not exists.");
 		}
 	}
 
@@ -230,16 +237,16 @@ public class DTOGeneratorImplTest {
 	@Test
 	public void testGetDTOFieldPackage() {
 		try {
-			Field field = Bean.class.getDeclaredField("attribut1");
-			assertEquals(
+			final Field field = Bean.class.getDeclaredField("attribut1");
+			Assert.assertEquals(
 					"getFieldPackage does not result \"\" for attribut1 field",
 					"",
 					this.dtoGeneratorImpl.getDTOFieldPackage(Bean.class,
 							field.getGenericType()));
-		} catch (SecurityException e) {
-			fail("Field attribut1 not accessible.");
-		} catch (NoSuchFieldException e) {
-			fail("Field attribut1 does not exists.");
+		} catch (final SecurityException e) {
+			Assert.fail("Field attribut1 not accessible.");
+		} catch (final NoSuchFieldException e) {
+			Assert.fail("Field attribut1 does not exists.");
 		}
 	}
 
@@ -251,13 +258,13 @@ public class DTOGeneratorImplTest {
 	@Test
 	public void testGetDTOClassFileWriter() {
 		try {
-			FileWriter beanFileWriter = new FileWriter(new File(""));
-			FileWriter bean2FileWriter = new FileWriter(new File(""));
+			final FileWriter beanFileWriter = new FileWriter(new File(""));
+			final FileWriter bean2FileWriter = new FileWriter(new File(""));
 			this.dtoGeneratorImpl.fileWriters.put(Bean.class, beanFileWriter);
 			this.dtoGeneratorImpl.fileWriters.put(Bean2.class, bean2FileWriter);
-			assertEquals(beanFileWriter,
+			Assert.assertEquals(beanFileWriter,
 					this.dtoGeneratorImpl.getDTOClassFileWriter(Bean.class));
-		} catch (IOException e) {
+		} catch (final IOException e) {
 			// Should not happened as the file is not created and we do not
 			// write in.
 		}
@@ -275,12 +282,13 @@ public class DTOGeneratorImplTest {
 			this.dtoGeneratorImpl.makeDTOPackage(Bean.class);
 			this.dtoGeneratorImpl.makeDTOClass(Bean.class);
 			this.dtoGeneratorImpl.getDTOClassFileWriter(Bean.class).close();
-			File file = new File(this.generatedDirectory.getAbsolutePath()
-					+ "\\fr\\maven\\dto\\bean\\dto\\BeanDTO.java");
-			assertTrue("package has not been created", new File(
+			final File file = new File(
+					this.generatedDirectory.getAbsolutePath()
+							+ "\\fr\\maven\\dto\\bean\\dto\\BeanDTO.java");
+			Assert.assertTrue("package has not been created", new File(
 					this.generatedDirectory.getAbsolutePath()
 							+ "\\fr\\maven\\dto\\bean\\dto").exists());
-			BufferedReader bf = new BufferedReader(new FileReader(file));
+			final BufferedReader bf = new BufferedReader(new FileReader(file));
 			String line;
 			boolean validPackage = false;
 			while ((line = bf.readLine()) != null) {
@@ -290,9 +298,9 @@ public class DTOGeneratorImplTest {
 			}
 			bf.close();
 			this.deleteFiles(file);
-			assertTrue("Package generated not valid", validPackage);
-		} catch (IOException e) {
-			fail("The package has not been generated (could not write or read file).");
+			Assert.assertTrue("Package generated not valid", validPackage);
+		} catch (final IOException e) {
+			Assert.fail("The package has not been generated (could not write or read file).");
 			e.printStackTrace();
 		}
 	}
@@ -308,9 +316,10 @@ public class DTOGeneratorImplTest {
 			this.dtoGeneratorImpl.makeDTOPackage(Bean.class);
 			this.dtoGeneratorImpl.makeDTOClass(Bean.class);
 			this.dtoGeneratorImpl.getDTOClassFileWriter(Bean.class).close();
-			File file = new File(this.generatedDirectory.getAbsolutePath()
-					+ "\\fr\\maven\\dto\\bean\\dto\\BeanDTO.java");
-			BufferedReader bf = new BufferedReader(new FileReader(file));
+			final File file = new File(
+					this.generatedDirectory.getAbsolutePath()
+							+ "\\fr\\maven\\dto\\bean\\dto\\BeanDTO.java");
+			final BufferedReader bf = new BufferedReader(new FileReader(file));
 			String line;
 			boolean validClass = false;
 			while ((line = bf.readLine()) != null) {
@@ -321,9 +330,9 @@ public class DTOGeneratorImplTest {
 			}
 			bf.close();
 			this.deleteFiles(file);
-			assertTrue("Class generated not valid", validClass);
-		} catch (IOException e) {
-			fail("The class has not been generated (could not write or read file).");
+			Assert.assertTrue("Class generated not valid", validClass);
+		} catch (final IOException e) {
+			Assert.fail("The class has not been generated (could not write or read file).");
 		}
 	}
 
@@ -340,10 +349,11 @@ public class DTOGeneratorImplTest {
 			this.dtoGeneratorImpl.makeDTOField(Bean2.class,
 					Bean2.class.getDeclaredField("bean"));
 			this.dtoGeneratorImpl.getDTOClassFileWriter(Bean.class).close();
-			File file = new File(this.generatedDirectory.getAbsolutePath()
-					+ "\\fr\\maven\\dto\\bean\\dto\\Bean2DTO.java");
+			final File file = new File(
+					this.generatedDirectory.getAbsolutePath()
+							+ "\\fr\\maven\\dto\\bean\\dto\\Bean2DTO.java");
 			this.dtoGeneratorImpl.getDTOClassFileWriter(Bean2.class).close();
-			BufferedReader bf = new BufferedReader(new FileReader(file));
+			final BufferedReader bf = new BufferedReader(new FileReader(file));
 			String line;
 			boolean validField = false;
 			while ((line = bf.readLine()) != null) {
@@ -353,13 +363,13 @@ public class DTOGeneratorImplTest {
 			}
 			bf.close();
 			this.deleteFiles(file);
-			assertTrue("Field generated not valid", validField);
-		} catch (IOException e) {
-			fail("The field has not been generated (could not write or read file).");
-		} catch (SecurityException e) {
-			fail("The field has not been generated (the source field is not accessible).");
-		} catch (NoSuchFieldException e) {
-			fail("The field has not been generated (the source field is not accessible).");
+			Assert.assertTrue("Field generated not valid", validField);
+		} catch (final IOException e) {
+			Assert.fail("The field has not been generated (could not write or read file).");
+		} catch (final SecurityException e) {
+			Assert.fail("The field has not been generated (the source field is not accessible).");
+		} catch (final NoSuchFieldException e) {
+			Assert.fail("The field has not been generated (the source field is not accessible).");
 		}
 	}
 
@@ -376,10 +386,11 @@ public class DTOGeneratorImplTest {
 			this.dtoGeneratorImpl.makeDTOFieldGetter(Bean2.class,
 					Bean2.class.getDeclaredField("bean"));
 			this.dtoGeneratorImpl.getDTOClassFileWriter(Bean.class).close();
-			File file = new File(this.generatedDirectory.getAbsolutePath()
-					+ "\\fr\\maven\\dto\\bean\\dto\\Bean2DTO.java");
+			final File file = new File(
+					this.generatedDirectory.getAbsolutePath()
+							+ "\\fr\\maven\\dto\\bean\\dto\\Bean2DTO.java");
 			this.dtoGeneratorImpl.getDTOClassFileWriter(Bean2.class).close();
-			BufferedReader bf = new BufferedReader(new FileReader(file));
+			final BufferedReader bf = new BufferedReader(new FileReader(file));
 			String line;
 			boolean validFieldGetter = false;
 			while ((line = bf.readLine()) != null) {
@@ -389,13 +400,14 @@ public class DTOGeneratorImplTest {
 			}
 			bf.close();
 			this.deleteFiles(file);
-			assertTrue("Field getter generated not valid", validFieldGetter);
-		} catch (IOException e) {
-			fail("The field getter has not been generated (could not write or read file).");
-		} catch (SecurityException e) {
-			fail("The field getter has not been generated (the source field is not accessible).");
-		} catch (NoSuchFieldException e) {
-			fail("The field getter has not been generated (the source field is not accessible).");
+			Assert.assertTrue("Field getter generated not valid",
+					validFieldGetter);
+		} catch (final IOException e) {
+			Assert.fail("The field getter has not been generated (could not write or read file).");
+		} catch (final SecurityException e) {
+			Assert.fail("The field getter has not been generated (the source field is not accessible).");
+		} catch (final NoSuchFieldException e) {
+			Assert.fail("The field getter has not been generated (the source field is not accessible).");
 		}
 	}
 
@@ -412,10 +424,11 @@ public class DTOGeneratorImplTest {
 			this.dtoGeneratorImpl.makeDTOFieldSetter(Bean2.class,
 					Bean2.class.getDeclaredField("bean"));
 			this.dtoGeneratorImpl.getDTOClassFileWriter(Bean.class).close();
-			File file = new File(this.generatedDirectory.getAbsolutePath()
-					+ "\\fr\\maven\\dto\\bean\\dto\\Bean2DTO.java");
+			final File file = new File(
+					this.generatedDirectory.getAbsolutePath()
+							+ "\\fr\\maven\\dto\\bean\\dto\\Bean2DTO.java");
 			this.dtoGeneratorImpl.getDTOClassFileWriter(Bean2.class).close();
-			BufferedReader bf = new BufferedReader(new FileReader(file));
+			final BufferedReader bf = new BufferedReader(new FileReader(file));
 			String line;
 			boolean validFieldSetter = false;
 			while ((line = bf.readLine()) != null) {
@@ -425,20 +438,21 @@ public class DTOGeneratorImplTest {
 			}
 			bf.close();
 			this.deleteFiles(file);
-			assertTrue("Field setter generated not valid", validFieldSetter);
-		} catch (IOException e) {
-			fail("The field getter has not been generated (could not write or read file).");
-		} catch (SecurityException e) {
-			fail("The field getter has not been generated (the source field is not accessible).");
-		} catch (NoSuchFieldException e) {
-			fail("The field getter has not been generated (the source field is not accessible).");
+			Assert.assertTrue("Field setter generated not valid",
+					validFieldSetter);
+		} catch (final IOException e) {
+			Assert.fail("The field getter has not been generated (could not write or read file).");
+		} catch (final SecurityException e) {
+			Assert.fail("The field getter has not been generated (the source field is not accessible).");
+		} catch (final NoSuchFieldException e) {
+			Assert.fail("The field getter has not been generated (the source field is not accessible).");
 		}
 	}
 
-	private void deleteFiles(File file) {
+	private void deleteFiles(final File file) {
 		if (file != null && file.exists()) {
 			if (file.isDirectory()) {
-				for (File fileChild : file.listFiles()) {
+				for (final File fileChild : file.listFiles()) {
 					if (fileChild != null && fileChild.exists()) {
 						this.deleteFiles(fileChild);
 					}
