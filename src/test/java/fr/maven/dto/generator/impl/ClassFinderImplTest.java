@@ -4,6 +4,9 @@
 package fr.maven.dto.generator.impl;
 
 import java.io.File;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLClassLoader;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -123,6 +126,58 @@ public class ClassFinderImplTest {
 					classBean2Found);
 		} catch (final ClassNotFoundException e) {
 			Assert.fail("testGetClassesToGenerateWithValidPattern failed, classes not found with valid pattern.");
+		}
+	}
+
+	/**
+	 * Test method for
+	 * {@link fr.maven.dto.generator.impl.ClassFinderImpl#getClassesToGenerate(List, String[], String[])
+	 * .
+	 */
+	@Test
+	public void testGetClassesToGenerateWithValidPatternAndJarInClasspath() {
+		URLClassLoader urlClassLoader = null;
+		try {
+			final List<URL> urls = new ArrayList<URL>();
+			final URL beansJarURL = new File("target/test-classes/beans.jar")
+					.toURI().toURL();
+			final URL beanUrl = new File(
+					"target/test-classes/fr/maven/dto/Bean.class").toURI()
+					.toURL();
+			urls.add(beansJarURL);
+			urls.add(beanUrl);
+			urlClassLoader = new URLClassLoader(urls.toArray(new URL[0]));
+		} catch (final MalformedURLException e1) {
+			// Should not happened because urls are created from valid files.
+			e1.printStackTrace();
+		}
+
+		final List<String> includes = new ArrayList<String>();
+		includes.add("**.Bean");
+		includes.add("**.BeanInAJar");
+		final List<File> baseDirectories = new ArrayList<File>();
+		baseDirectories.add(new File("target/test-classes"));
+		baseDirectories.add(new File("target/test-classes/beans.jar"));
+		try {
+			final List<Class<?>> classesFound = this.classFinder
+					.getClassesToGenerate(urlClassLoader, baseDirectories,
+							includes, new ArrayList<String>());
+			boolean classBeanFound = false;
+			boolean classBeanInAJarFound = false;
+			for (final Class<?> clazz : classesFound) {
+				if ("fr.maven.dto.bean.Bean".equals(clazz.getCanonicalName())) {
+					classBeanFound = true;
+				}
+				if ("fr.maven.dto.test.BeanInAJar".equals(clazz
+						.getCanonicalName())) {
+					classBeanInAJarFound = true;
+				}
+			}
+			Assert.assertTrue("Class Bean has not been found.", classBeanFound);
+			Assert.assertTrue("Class BeanInAJar has not been found.",
+					classBeanInAJarFound);
+		} catch (final ClassNotFoundException e) {
+			Assert.fail("testGetClassesToGenerateWithValidPatternAndJarInClasspath failed, classes not found with valid pattern and jar in classpath.");
 		}
 	}
 }
