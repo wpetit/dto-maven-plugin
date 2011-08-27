@@ -11,6 +11,7 @@ import java.util.Set;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
+import org.apache.maven.project.MavenProject;
 
 import fr.maven.dto.generator.ClassLoaderProvider;
 import fr.maven.dto.generator.impl.ClassLoaderProviderImpl;
@@ -44,6 +45,12 @@ public class DTOMojo extends AbstractMojo {
 	Set<Artifact> projectDependencies;
 
 	/**
+	 * @parameter expression="${project}"
+	 * @required
+	 */
+	MavenProject project;
+
+	/**
 	 * Location of the project build directory.
 	 * 
 	 * @parameter expression="${project.build.outputDirectory}"
@@ -55,7 +62,7 @@ public class DTOMojo extends AbstractMojo {
 	 * Location of the DTO classes generation directory.
 	 * 
 	 * @parameter expression="${generatedDirectory}"
-	 *            default-value="${project.build.directory}/generated"
+	 *            default-value="${project.build.directory}/generated-sources"
 	 * @required
 	 */
 	private File generatedDirectory;
@@ -90,12 +97,14 @@ public class DTOMojo extends AbstractMojo {
 		}
 		try {
 			this.getLog().debug("dto-maven-plugin launch the generation.");
-			DTOLauncher dtoLauncher = new DTOLauncher();
+			final DTOLauncher dtoLauncher = new DTOLauncher();
 			dtoLauncher.execute(this.getClassLoader(this.outputDirectory),
 					this.getBaseDirectories(), this.includes, this.excludes,
 					this.generatedDirectory);
 			this.getLog().debug("dto-maven-plugin finished the generation.");
-		} catch (Exception e) {
+			this.project.addCompileSourceRoot(this.generatedDirectory
+					.getAbsolutePath());
+		} catch (final Exception e) {
 			this.getLog().error("The generation has failed.", e);
 			throw new MojoExecutionException("The generation has failed.", e);
 		}
@@ -110,26 +119,26 @@ public class DTOMojo extends AbstractMojo {
 	 * @throws MalformedURLException
 	 *             if the creation of url for files found failed
 	 */
-	protected ClassLoader getClassLoader(File directory)
+	protected ClassLoader getClassLoader(final File directory)
 			throws MalformedURLException {
 		this.getLog().debug("Begin classloader creation");
 
-		List<URL> urlList = new ArrayList<URL>();
+		final List<URL> urlList = new ArrayList<URL>();
 
 		urlList.add(directory.toURI().toURL());
-		for (Artifact artifact : this.pluginArtifacts) {
+		for (final Artifact artifact : this.pluginArtifacts) {
 			urlList.add(artifact.getFile().toURI().toURL());
 		}
-		for (Artifact artifact : this.projectDependencies) {
+		for (final Artifact artifact : this.projectDependencies) {
 			if (artifact.getFile() != null) {
 				urlList.add(artifact.getFile().toURI().toURL());
 			}
 		}
 
-		ClassLoaderProvider classLoaderProvider = new ClassLoaderProviderImpl(
+		final ClassLoaderProvider classLoaderProvider = new ClassLoaderProviderImpl(
 				urlList.toArray(new URL[0]));
 		AccessController.doPrivileged(classLoaderProvider);
-		ClassLoader urlClassLoader = classLoaderProvider.getClassLoader();
+		final ClassLoader urlClassLoader = classLoaderProvider.getClassLoader();
 
 		this.getLog().debug("End classloader creation");
 		return urlClassLoader;
@@ -144,12 +153,12 @@ public class DTOMojo extends AbstractMojo {
 	 */
 	protected List<File> getBaseDirectories() {
 		this.getLog().debug("Begin classes containers listing");
-		List<File> directoriesOrArchive = new ArrayList<File>();
+		final List<File> directoriesOrArchive = new ArrayList<File>();
 		directoriesOrArchive.add(this.outputDirectory);
-		for (Artifact artifact : this.pluginArtifacts) {
+		for (final Artifact artifact : this.pluginArtifacts) {
 			directoriesOrArchive.add(artifact.getFile());
 		}
-		for (Artifact artifact : this.projectDependencies) {
+		for (final Artifact artifact : this.projectDependencies) {
 			directoriesOrArchive.add(artifact.getFile());
 		}
 		this.getLog().debug("End classes containers listing");
