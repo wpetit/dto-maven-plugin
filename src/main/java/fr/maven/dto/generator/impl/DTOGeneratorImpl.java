@@ -69,7 +69,7 @@ public class DTOGeneratorImpl implements DTOGenerator {
 	@Override
 	public void generateDTOs(final List<Class<?>> classes) throws IOException {
 		this.classesToGenerate = classes;
-		for (Class<?> clazz : classes) {
+		for (final Class<?> clazz : classes) {
 			this.generateDTO(clazz);
 		}
 	}
@@ -95,13 +95,13 @@ public class DTOGeneratorImpl implements DTOGenerator {
 	 *             if the directory creation failed.
 	 */
 	protected void makeDTOPackage(final Class<?> clazz) throws IOException {
-		File packageDirectory = new File(
+		final File packageDirectory = new File(
 				this.generatedDirectory.getAbsolutePath()
 						+ File.separator
 						+ this.getDTOPackage(clazz).replace('.',
 								File.separatorChar));
 		if (!packageDirectory.exists()) {
-			boolean directoryCreated = packageDirectory.mkdirs();
+			final boolean directoryCreated = packageDirectory.mkdirs();
 			if (!directoryCreated) {
 				throw new IOException(
 						"The generated directory can not be created.");
@@ -154,33 +154,70 @@ public class DTOGeneratorImpl implements DTOGenerator {
 	 * @return the type canonical name.
 	 */
 	protected String getDTOType(final Class<?> clazz, final Type type) {
-		StringBuffer typeCanonicalName = new StringBuffer();
-		typeCanonicalName.append(this.getDTOFieldPackage(clazz, type));
+		final StringBuffer typeSimpleName = new StringBuffer();
+		typeSimpleName.append(this.getDTOFieldPackage(clazz, type));
 		if (type instanceof ParameterizedType) {
-			ParameterizedType parameterizedType = (ParameterizedType) type;
-			typeCanonicalName
-					.append(((Class<?>) parameterizedType.getRawType())
-							.getSimpleName() + "<");
-			Type[] typeArguments = parameterizedType.getActualTypeArguments();
+			final ParameterizedType parameterizedType = (ParameterizedType) type;
+			typeSimpleName.append(((Class<?>) parameterizedType.getRawType())
+					.getSimpleName() + "<");
+			final Type[] typeArguments = parameterizedType
+					.getActualTypeArguments();
 			for (int i = 0; i < typeArguments.length; i++) {
-				typeCanonicalName.append(this.getDTOType(clazz,
-						typeArguments[i]));
+				typeSimpleName.append(this.getDTOType(clazz, typeArguments[i]));
 				if (i != (typeArguments.length - 1)) {
-					typeCanonicalName.append(", ");
+					typeSimpleName.append(", ");
 				}
 			}
-			typeCanonicalName.append(">");
+			typeSimpleName.append(">");
 		} else {
-			Class<?> clazzType = ((Class<?>) type);
-			typeCanonicalName.append(((Class<?>) type).getSimpleName());
-			if (this.isClassToGenerate(clazzType)) {
-				typeCanonicalName.append("DTO");
-			}
+			final Class<?> clazzType = ((Class<?>) type);
 			if (clazzType.isArray()) {
-				typeCanonicalName.append("[]");
+				typeSimpleName.append(this.getArrayComponentType(clazzType)
+						.getSimpleName());
+				for (int i = 0; i < this.getArrayDimension(clazzType); i++) {
+					typeSimpleName.append("[]");
+				}
+			} else {
+				typeSimpleName.append(((Class<?>) type).getSimpleName());
+				if (this.isClassToGenerate(clazzType)) {
+					typeSimpleName.append("DTO");
+				}
 			}
 		}
-		return typeCanonicalName.toString();
+		return typeSimpleName.toString();
+	}
+
+	/**
+	 * Return the real component type of an array. E.g. for Bean[], Bean[][]
+	 * ,... , it returns Bean
+	 * 
+	 * @param clazz
+	 *            the array
+	 * @return the component type
+	 */
+	protected Class<?> getArrayComponentType(final Class<?> clazz) {
+		if (clazz.isArray()) {
+			return this.getArrayComponentType(clazz.getComponentType());
+		} else {
+			return clazz;
+		}
+	}
+
+	/**
+	 * Return the dimension of the array. E.g. : For Bean[] it returns 1. For
+	 * Bean[][] it returns 2...
+	 * 
+	 * @param clazz
+	 *            the array we want the dimension.
+	 * @return the dimension.
+	 */
+	protected int getArrayDimension(final Class<?> clazz) {
+		int arrayDimension = 0;
+		if (clazz.isArray()) {
+			arrayDimension++;
+			arrayDimension += this.getArrayDimension(clazz.getComponentType());
+		}
+		return arrayDimension;
 	}
 
 	/**
@@ -201,6 +238,9 @@ public class DTOGeneratorImpl implements DTOGenerator {
 					.getRawType());
 		} else {
 			fieldTypeClass = (Class<?>) fieldType;
+			if (fieldTypeClass.isArray()) {
+				fieldTypeClass = this.getArrayComponentType(fieldTypeClass);
+			}
 		}
 		fieldPackage = ((Class<?>) fieldTypeClass).getPackage();
 		String result = "";
@@ -229,22 +269,22 @@ public class DTOGeneratorImpl implements DTOGenerator {
 	protected FileWriter getDTOClassFileWriter(final Class<?> clazz)
 			throws IOException {
 		if (!this.fileWriters.containsKey(clazz)) {
-			String directory = this.generatedDirectory.getAbsolutePath()
+			final String directory = this.generatedDirectory.getAbsolutePath()
 					+ File.separator
 					+ this.getDTOPackage(clazz).replace(".", File.separator);
-			File classFile = new File(directory.concat(File.separator)
+			final File classFile = new File(directory.concat(File.separator)
 					.concat(clazz.getSimpleName()).concat("DTO.java"));
 			if (classFile.exists()) {
-				boolean fileDeleted = classFile.delete();
+				final boolean fileDeleted = classFile.delete();
 				if (fileDeleted) {
-					boolean fileCreated = classFile.createNewFile();
+					final boolean fileCreated = classFile.createNewFile();
 					if (!fileCreated) {
 						throw new IOException("The file " + classFile
 								+ " can not be created.");
 					}
 				}
 			}
-			FileWriter fw = new FileWriter(classFile);
+			final FileWriter fw = new FileWriter(classFile);
 			this.fileWriters.put(clazz, fw);
 			return fw;
 		} else {
@@ -261,7 +301,7 @@ public class DTOGeneratorImpl implements DTOGenerator {
 	 *             if the file is not writable.
 	 */
 	protected void makeDTOClass(final Class<?> clazz) throws IOException {
-		FileWriter fw = this.getDTOClassFileWriter(clazz);
+		final FileWriter fw = this.getDTOClassFileWriter(clazz);
 		fw.write("package " + this.getDTOPackage(clazz) + ";" + "\n\n");
 		fw.write("import java.io.Serializable;\n\n");
 
@@ -274,12 +314,12 @@ public class DTOGeneratorImpl implements DTOGenerator {
 		fw.write("public class " + clazz.getSimpleName()
 				+ "DTO implements Serializable {\n\n");
 		fw.write("\tprivate static final long serialVersionUID = 1L;\n\n");
-		for (Field field : clazz.getDeclaredFields()) {
+		for (final Field field : clazz.getDeclaredFields()) {
 			if (!Modifier.isStatic(field.getModifiers())) {
 				this.makeDTOField(clazz, field);
 			}
 		}
-		for (Field field : clazz.getDeclaredFields()) {
+		for (final Field field : clazz.getDeclaredFields()) {
 			if (!Modifier.isStatic(field.getModifiers())) {
 				this.makeDTOFieldGetter(clazz, field);
 				this.makeDTOFieldSetter(clazz, field);
@@ -300,8 +340,8 @@ public class DTOGeneratorImpl implements DTOGenerator {
 	 */
 	protected void makeDTOField(final Class<?> clazz, final Field field)
 			throws IOException {
-		FileWriter fw = this.getDTOClassFileWriter(clazz);
-		String fieldType = this.getDTOFieldType(clazz, field);
+		final FileWriter fw = this.getDTOClassFileWriter(clazz);
+		final String fieldType = this.getDTOFieldType(clazz, field);
 		fw.write("\t/**\n");
 		fw.write("\t * @see " + clazz.getCanonicalName() + "#"
 				+ field.getName() + "\n");
@@ -322,9 +362,9 @@ public class DTOGeneratorImpl implements DTOGenerator {
 	 */
 	protected void makeDTOFieldGetter(final Class<?> clazz, final Field field)
 			throws IOException {
-		FileWriter fw = this.getDTOClassFileWriter(clazz);
+		final FileWriter fw = this.getDTOClassFileWriter(clazz);
 		String methodSignature;
-		char firstFieldNameCharacterUpper = Character.toUpperCase(field
+		final char firstFieldNameCharacterUpper = Character.toUpperCase(field
 				.getName().charAt(0));
 		String fieldNameWithoutFirstCharacter = "";
 		if (field.getName().length() > 1) {
@@ -360,15 +400,15 @@ public class DTOGeneratorImpl implements DTOGenerator {
 	 */
 	protected void makeDTOFieldSetter(final Class<?> clazz, final Field field)
 			throws IOException {
-		FileWriter fw = this.getDTOClassFileWriter(clazz);
+		final FileWriter fw = this.getDTOClassFileWriter(clazz);
 
-		char firstFieldNameCharacterUpper = Character.toUpperCase(field
+		final char firstFieldNameCharacterUpper = Character.toUpperCase(field
 				.getName().charAt(0));
 		String fieldNameWithoutFirstCharacter = "";
 		if (field.getName().length() > 1) {
 			fieldNameWithoutFirstCharacter = field.getName().substring(1);
 		}
-		String methodSignature = "set" + firstFieldNameCharacterUpper
+		final String methodSignature = "set" + firstFieldNameCharacterUpper
 				+ fieldNameWithoutFirstCharacter;
 		fw.write("\t/**\n");
 		fw.write("\t * @see " + clazz.getCanonicalName() + "#"

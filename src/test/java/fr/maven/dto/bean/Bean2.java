@@ -4,6 +4,7 @@
 package fr.maven.dto.bean;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * Bean to test DTO generation.
@@ -18,6 +19,10 @@ public class Bean2 {
 	private List<Bean> beans;
 
 	private List<List<Bean>> beansList;
+
+	private Map<Bean, AnotherBean> beansMap;
+
+	private Bean[] beanArray;
 
 	private List<String> strings;
 
@@ -79,5 +84,35 @@ public class Bean2 {
 	 */
 	public List<List<Bean>> getBeansList() {
 		return this.beansList;
+	}
+
+	/**
+	 * @param beansMap
+	 *            the beansMap to set
+	 */
+	public void setBeansMap(final Map<Bean, AnotherBean> beansMap) {
+		this.beansMap = beansMap;
+	}
+
+	/**
+	 * @return the beansMap
+	 */
+	public Map<Bean, AnotherBean> getBeansMap() {
+		return this.beansMap;
+	}
+
+	/**
+	 * @param beanArray
+	 *            the beanArray to set
+	 */
+	public void setBeanArray(final Bean[] beanArray) {
+		this.beanArray = beanArray;
+	}
+
+	/**
+	 * @return the beanArray
+	 */
+	public Bean[] getBeanArray() {
+		return this.beanArray;
 	}
 }
