@@ -146,14 +146,17 @@
 									<format>html</format>
 								</formats>
 								<instrumentation>
-									<ignores>
-										<ignore>fr.maven.dto.HelpMojo</ignore>
-									</ignores>
 									<excludes>
+										<exclude>**/HelpMojo.class</exclude>
 										<exclude>fr/maven/dto/**Test.class</exclude>
 									</excludes>
 								</instrumentation>
 							</configuration>
+						</plugin>
+						<plugin>
+							<groupId>org.codehaus.mojo</groupId>
+							<artifactId>taglist-maven-plugin</artifactId>
+							<version>2.4</version>
 						</plugin>
 						<plugin>
 							<groupId>org.apache.maven.plugins</groupId>
