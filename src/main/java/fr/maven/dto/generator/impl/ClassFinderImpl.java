@@ -23,24 +23,6 @@ import fr.maven.dto.generator.ClassFinder;
 public class ClassFinderImpl implements ClassFinder {
 
 	/**
-	 * 
-	 * {@inheritDoc}
-	 * 
-	 * @see fr.maven.dto.generator.ClassFinder#getClassesToGenerate(java.util.List)
-	 */
-	@Override
-	public List<Class<?>> getClassesToGenerate(final List<String> includeClasses)
-			throws ClassNotFoundException {
-		List<Class<?>> classesToGenerate = new ArrayList<Class<?>>();
-		for (String classString : includeClasses) {
-			Class<?> clazz = this.getClass().getClassLoader()
-					.loadClass(classString);
-			classesToGenerate.add(clazz);
-		}
-		return classesToGenerate;
-	}
-
-	/**
 	 * {@inheritDoc}
 	 * 
 	 * @see fr.maven.dto.generator.ClassFinder#getClassesToGenerate(java.lang.ClassLoader,
@@ -52,41 +34,126 @@ public class ClassFinderImpl implements ClassFinder {
 			final List<String> includePatterns,
 			final List<String> excludePatterns) throws ClassNotFoundException {
 
-		List<Class<?>> classes = new ArrayList<Class<?>>();
-		String[] includesPath = this
+		final List<Class<?>> classes = new ArrayList<Class<?>>();
+		final String[] includesPath = this
 				.convertClassPatternsToPathPatterns(includePatterns);
-		String[] excludesPath = this
+		final String[] excludesPath = this
 				.convertClassPatternsToPathPatterns(excludePatterns);
 
-		for (File directoryOrArchive : baseDirectories) {
+		for (final File directoryOrArchive : baseDirectories) {
 			if (directoryOrArchive != null) {
-				if (directoryOrArchive.isDirectory()) {
-					DirectoryScanner ds = new DirectoryScanner();
-					ds.setBasedir(directoryOrArchive);
-					ds.setIncludes(includesPath);
-					ds.setExcludes(excludesPath);
-					ds.setCaseSensitive(true);
-					ds.scan();
-					for (String fileFound : ds.getIncludedFiles()) {
-						String classString = this
-								.convertPathToCanonicalClassName(fileFound);
-						Class<?> clazz = classLoader.loadClass(classString);
-						classes.add(clazz);
-					}
-				} else {
-					ZipScanner ds = new ZipScanner();
-					ds.setSrc(directoryOrArchive);
-					ds.setIncludes(includesPath);
-					ds.setExcludes(excludesPath);
-					ds.setCaseSensitive(true);
-					for (String fileFound : ds.getIncludedFiles()) {
-						String classString = this
-								.convertPathToCanonicalClassName(fileFound);
-						Class<?> clazz = classLoader.loadClass(classString);
-						classes.add(clazz);
-					}
-				}
+				classes.addAll(this.scanDirectoryOrArchive(classLoader,
+						directoryOrArchive, includesPath, excludesPath));
 			}
+		}
+		return classes;
+	}
+
+	/**
+	 * Scan the directory or the archive given to find classes that match
+	 * includes path, and do not match excludes path. Classes found are load to
+	 * the class loader given and returned.
+	 * 
+	 * @param classLoader
+	 *            the class loader to load classes found.
+	 * @param directoryOrArchive
+	 *            the directory or the archive to scan.
+	 * @param includesPath
+	 *            the list of includes path patterns that classes must match.
+	 * @param excludesPath
+	 *            the list of excludes path patterns that classes must not
+	 *            match.
+	 * @return the list of classes found.
+	 * @throws ClassNotFoundException
+	 *             if the class found in the package has not been found after
+	 *             loading in the class loader.
+	 */
+	protected List<Class<?>> scanDirectoryOrArchive(
+			final ClassLoader classLoader, final File directoryOrArchive,
+			final String[] includesPath, final String[] excludesPath)
+			throws ClassNotFoundException {
+		final List<Class<?>> classes = new ArrayList<Class<?>>();
+		if (directoryOrArchive.isDirectory()) {
+			classes.addAll(this.scanDirectory(classLoader, directoryOrArchive,
+					includesPath, excludesPath));
+		} else {
+			classes.addAll(this.scanArchive(classLoader, directoryOrArchive,
+					includesPath, excludesPath));
+		}
+		return classes;
+	}
+
+	/**
+	 * Scan the directory given to find classes that match includes path, and do
+	 * not match excludes path. Classes found are load to the class loader given
+	 * and returned.
+	 * 
+	 * @param classLoader
+	 *            the class loader to load classes found.
+	 * @param directory
+	 *            the directory to scan.
+	 * @param includesPath
+	 *            the list of includes path patterns that classes must match.
+	 * @param excludesPath
+	 *            the list of excludes path patterns that classes must not
+	 *            match.
+	 * @return the list of classes found.
+	 * @throws ClassNotFoundException
+	 *             if the class found in the package has not been found after
+	 *             loading in the class loader.
+	 */
+	protected List<Class<?>> scanDirectory(final ClassLoader classLoader,
+			final File directory, final String[] includesPath,
+			final String[] excludesPath) throws ClassNotFoundException {
+		final List<Class<?>> classes = new ArrayList<Class<?>>();
+		final DirectoryScanner ds = new DirectoryScanner();
+		ds.setBasedir(directory);
+		ds.setIncludes(includesPath);
+		ds.setExcludes(excludesPath);
+		ds.setCaseSensitive(true);
+		ds.scan();
+		for (final String fileFound : ds.getIncludedFiles()) {
+			final String classString = this
+					.convertPathToCanonicalClassName(fileFound);
+			final Class<?> clazz = classLoader.loadClass(classString);
+			classes.add(clazz);
+		}
+		return classes;
+	}
+
+	/**
+	 * Scan the archive given to find classes that match includes path, and do
+	 * not match excludes path. Classes found are load to the class loader given
+	 * and returned.
+	 * 
+	 * @param classLoader
+	 *            the class loader to load classes found.
+	 * @param archive
+	 *            the archive to scan.
+	 * @param includesPath
+	 *            the list of includes path patterns that classes must match.
+	 * @param excludesPath
+	 *            the list of excludes path patterns that classes must not
+	 *            match.
+	 * @return the list of classes found.
+	 * @throws ClassNotFoundException
+	 *             if the class found in the package has not been found after
+	 *             loading in the class loader.
+	 */
+	protected List<Class<?>> scanArchive(final ClassLoader classLoader,
+			final File archive, final String[] includesPath,
+			final String[] excludesPath) throws ClassNotFoundException {
+		final List<Class<?>> classes = new ArrayList<Class<?>>();
+		final ZipScanner ds = new ZipScanner();
+		ds.setSrc(archive);
+		ds.setIncludes(includesPath);
+		ds.setExcludes(excludesPath);
+		ds.setCaseSensitive(true);
+		for (final String fileFound : ds.getIncludedFiles()) {
+			final String classString = this
+					.convertPathToCanonicalClassName(fileFound);
+			final Class<?> clazz = classLoader.loadClass(classString);
+			classes.add(clazz);
 		}
 		return classes;
 	}
@@ -102,13 +169,10 @@ public class ClassFinderImpl implements ClassFinder {
 	protected String[] convertClassPatternsToPathPatterns(
 			final List<String> classPatterns) {
 		String[] pathPatterns = new String[0];
-		if (classPatterns != null) {
-			pathPatterns = new String[classPatterns.size()];
-			for (int i = 0; i < classPatterns.size(); i++) {
-				pathPatterns[i] = classPatterns.get(i).replace(".",
-						File.separator)
-						+ ".class";
-			}
+		pathPatterns = new String[classPatterns.size()];
+		for (int i = 0; i < classPatterns.size(); i++) {
+			pathPatterns[i] = classPatterns.get(i).replace(".", File.separator)
+					+ ".class";
 		}
 		return pathPatterns;
 	}
@@ -123,7 +187,7 @@ public class ClassFinderImpl implements ClassFinder {
 	 * @return the canonical class name got.
 	 */
 	protected String convertPathToCanonicalClassName(final String path) {
-		String classString = path.replace(File.separator, ".")
+		final String classString = path.replace(File.separator, ".")
 				.replace("/", ".").replace("\\", "").replace(".class", "");
 		return classString;
 	}

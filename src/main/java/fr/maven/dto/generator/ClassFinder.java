@@ -15,19 +15,6 @@ import java.util.List;
 public interface ClassFinder {
 
 	/**
-	 * Return the classes that match the canonical name classes list given.
-	 * 
-	 * @param includeClasses
-	 *            the list of canonical name classes list we want to get
-	 *            {@link Class}.
-	 * @return the classes got.
-	 * @throws ClassNotFoundException
-	 *             if the classes have not been found.
-	 */
-	List<Class<?>> getClassesToGenerate(List<String> includeClasses)
-			throws ClassNotFoundException;
-
-	/**
 	 * Return the classes in base directories that match the includePatterns and
 	 * do not math the excludePatterns.
 	 * 
