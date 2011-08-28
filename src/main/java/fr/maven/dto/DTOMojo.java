@@ -6,9 +6,8 @@ import java.net.URL;
 import java.security.AccessController;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
-import org.apache.maven.artifact.Artifact;
+import org.apache.maven.artifact.DependencyResolutionRequiredException;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.project.MavenProject;
@@ -20,35 +19,20 @@ import fr.maven.dto.generator.impl.ClassLoaderProviderImpl;
  * Mojo to generate DTO classes.
  * 
  * @goal dto
- * 
  * @phase generate-sources
+ * @requiresDependencyResolution compile
+ * @threadSafe
  */
 public class DTOMojo extends AbstractMojo {
 
 	/**
-	 * List of artifacts this plugin depends on. Used for resolving the DTO
-	 * maven plugin.
+	 * The project currently being built.
 	 * 
-	 * @parameter expression="${plugin.artifacts}"
-	 * @required
-	 * @readonly
-	 */
-	List<Artifact> pluginArtifacts;
-
-	/**
-	 * List of artifacts the project depends on.
-	 * 
-	 * @parameter expression="${project.dependencyArtifacts}"
-	 * @required
-	 * @readonly
-	 */
-	Set<Artifact> projectDependencies;
-
-	/**
 	 * @parameter expression="${project}"
 	 * @required
+	 * @readonly
 	 */
-	MavenProject project;
+	private MavenProject project;
 
 	/**
 	 * Location of the project build directory.
@@ -111,28 +95,24 @@ public class DTOMojo extends AbstractMojo {
 	}
 
 	/**
-	 * Create the classpath to set to java process to launch the generation.
+	 * Create the classloader that contains classes to generate.
 	 * 
 	 * @param directory
-	 *            the directory that contains classes.
-	 * @return the classpath result.
+	 *            the directory that contains compiled classes.
+	 * @return the classloader result.
 	 * @throws MalformedURLException
 	 *             if the creation of url for files found failed
+	 * @throws DependencyResolutionRequiredException
 	 */
 	protected ClassLoader getClassLoader(final File directory)
-			throws MalformedURLException {
+			throws MalformedURLException, DependencyResolutionRequiredException {
 		this.getLog().debug("Begin classloader creation");
 
 		final List<URL> urlList = new ArrayList<URL>();
 
-		urlList.add(directory.toURI().toURL());
-		for (final Artifact artifact : this.pluginArtifacts) {
-			urlList.add(artifact.getFile().toURI().toURL());
-		}
-		for (final Artifact artifact : this.projectDependencies) {
-			if (artifact.getFile() != null) {
-				urlList.add(artifact.getFile().toURI().toURL());
-			}
+		for (final Object filesPath : this.project
+				.getCompileClasspathElements()) {
+			urlList.add(new File((String) filesPath).toURI().toURL());
 		}
 
 		final ClassLoaderProvider classLoaderProvider = new ClassLoaderProviderImpl(
@@ -150,16 +130,15 @@ public class DTOMojo extends AbstractMojo {
 	 * @param classesDirectory
 	 *            the classes directory.
 	 * @return the list of directories and archive found.
+	 * @throws DependencyResolutionRequiredException
 	 */
-	protected List<File> getBaseDirectories() {
+	protected List<File> getBaseDirectories()
+			throws DependencyResolutionRequiredException {
 		this.getLog().debug("Begin classes containers listing");
 		final List<File> directoriesOrArchive = new ArrayList<File>();
-		directoriesOrArchive.add(this.outputDirectory);
-		for (final Artifact artifact : this.pluginArtifacts) {
-			directoriesOrArchive.add(artifact.getFile());
-		}
-		for (final Artifact artifact : this.projectDependencies) {
-			directoriesOrArchive.add(artifact.getFile());
+		for (final Object filesPath : this.project
+				.getCompileClasspathElements()) {
+			directoriesOrArchive.add(new File((String) filesPath));
 		}
 		this.getLog().debug("End classes containers listing");
 		return directoriesOrArchive;
@@ -177,12 +156,6 @@ public class DTOMojo extends AbstractMojo {
 		if (this.includes == null || this.includes.isEmpty()) {
 			this.getLog()
 					.warn("No classes to generate. Please check the plugin configuration.");
-			argsValid = false;
-		}
-		// Check classes are compiled before generation.
-		if (this.outputDirectory == null || !this.outputDirectory.exists()) {
-			this.getLog()
-					.warn("Output directory does not exists. Please check the classes you want to generate DTOs for have been compiled.");
 			argsValid = false;
 		}
 		return argsValid;
