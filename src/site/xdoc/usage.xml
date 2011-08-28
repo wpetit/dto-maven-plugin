@@ -13,19 +13,27 @@
 			<source><![CDATA[<project>
   ...
   <build>
-	<plugins>
-	  <plugin>
-		<groupId>fr.maven.dto</groupId>
-		<artifactId>dto-maven-plugin</artifactId>
-		<version>1.0</version>
-		<configuration>
-		  <sourceRoot>target/generated</sourceRoot>
-          <includes>
-            <include>fr.package.Bean</include>
-            <include>fr.package.**.AnotherBean</include>
-          </includes>
-		</configuration>
-	  </plugin>
+    <plugins>
+      <plugin>
+        <groupId>fr.maven.dto</groupId>
+        <artifactId>dto-maven-plugin</artifactId>
+        <version>1.0</version>
+        <executions>
+          <execution>
+            <id>generate-sources</id>
+            <phase>generate-sources</phase>
+            <goals>
+              <goal>dto</goal>
+            </goals>
+            <configuration>
+              <includes>
+                <include>fr.package.Bean</include>
+                <include>fr.package.**.AnotherBean</include>
+              </includes>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
     </plugins>
   </build>
   ...

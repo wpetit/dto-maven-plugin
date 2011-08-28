@@ -17,15 +17,24 @@
         <groupId>fr.maven.dto</groupId>
         <artifactId>dto-maven-plugin</artifactId>
         <version>1.0</version>
-        <configuration>
-          <!-- The directory where the DTO classes will be generated, default value is target/generated -->
-          <sourceRoot>target/generated</sourceRoot>
-          <!-- The list of classes you want to generate DTO classes for. -->
-          <includes>
-            <include>fr.package.Bean</include>
-            <include>fr.package.**.AnotherBean</include>
-          </includes>
-        </configuration>
+        <executions>
+          <execution>
+            <id>generate-sources</id>
+            <phase>generate-sources</phase>
+            <goals>
+              <goal>dto</goal>
+            </goals>
+            <configuration>
+              <!-- The directory where the DTO classes will be generated, default value is target/generated-sources -->
+              <generatedDirectory>target/generated</generatedDirectory>
+              <!-- The list of classes you want to generate DTO classes for. -->
+              <includes>
+                <include>fr.package.Bean</include>
+                <include>fr.package.**.AnotherBean</include>
+              </includes>
+            </configuration>
+          </execution>
+        </executions>
       </plugin>
     </plugins>
   </build>
