@@ -100,9 +100,11 @@ public class DTOMojo extends AbstractMojo {
 
 		final List<URL> urlList = new ArrayList<URL>();
 
-		for (final Object filesPath : this.project
-				.getCompileClasspathElements()) {
-			urlList.add(new File((String) filesPath).toURI().toURL());
+		for (final Object filePath : this.project.getCompileClasspathElements()) {
+			final File classpathElement = new File((String) filePath);
+			if (classpathElement.exists()) {
+				urlList.add(classpathElement.toURI().toURL());
+			}
 		}
 
 		final ClassLoaderProvider classLoaderProvider = new ClassLoaderProviderImpl(
@@ -124,9 +126,11 @@ public class DTOMojo extends AbstractMojo {
 			throws DependencyResolutionRequiredException {
 		this.getLog().debug("Begin classes containers listing");
 		final List<File> directoriesOrArchive = new ArrayList<File>();
-		for (final Object filesPath : this.project
-				.getCompileClasspathElements()) {
-			directoriesOrArchive.add(new File((String) filesPath));
+		for (final Object filePath : this.project.getCompileClasspathElements()) {
+			final File classpathElement = new File((String) filePath);
+			if (classpathElement.exists()) {
+				directoriesOrArchive.add(classpathElement);
+			}
 		}
 		this.getLog().debug("End classes containers listing");
 		return directoriesOrArchive;
