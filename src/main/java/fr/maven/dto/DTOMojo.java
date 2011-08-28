@@ -35,14 +35,6 @@ public class DTOMojo extends AbstractMojo {
 	private MavenProject project;
 
 	/**
-	 * Location of the project build directory.
-	 * 
-	 * @parameter expression="${project.build.outputDirectory}"
-	 * @required
-	 */
-	private File outputDirectory;
-
-	/**
 	 * Location of the DTO classes generation directory.
 	 * 
 	 * @parameter expression="${generatedDirectory}"
@@ -82,7 +74,7 @@ public class DTOMojo extends AbstractMojo {
 		try {
 			this.getLog().debug("dto-maven-plugin launch the generation.");
 			final DTOLauncher dtoLauncher = new DTOLauncher();
-			dtoLauncher.execute(this.getClassLoader(this.outputDirectory),
+			dtoLauncher.execute(this.getClassLoader(),
 					this.getBaseDirectories(), this.includes, this.excludes,
 					this.generatedDirectory);
 			this.getLog().debug("dto-maven-plugin finished the generation.");
@@ -97,15 +89,13 @@ public class DTOMojo extends AbstractMojo {
 	/**
 	 * Create the classloader that contains classes to generate.
 	 * 
-	 * @param directory
-	 *            the directory that contains compiled classes.
 	 * @return the classloader result.
 	 * @throws MalformedURLException
 	 *             if the creation of url for files found failed
 	 * @throws DependencyResolutionRequiredException
 	 */
-	protected ClassLoader getClassLoader(final File directory)
-			throws MalformedURLException, DependencyResolutionRequiredException {
+	protected ClassLoader getClassLoader() throws MalformedURLException,
+			DependencyResolutionRequiredException {
 		this.getLog().debug("Begin classloader creation");
 
 		final List<URL> urlList = new ArrayList<URL>();
@@ -127,8 +117,6 @@ public class DTOMojo extends AbstractMojo {
 	/**
 	 * Return all base directories or archive where classes can been found.
 	 * 
-	 * @param classesDirectory
-	 *            the classes directory.
 	 * @return the list of directories and archive found.
 	 * @throws DependencyResolutionRequiredException
 	 */
@@ -159,5 +147,45 @@ public class DTOMojo extends AbstractMojo {
 			argsValid = false;
 		}
 		return argsValid;
+	}
+
+	/**
+	 * Set the project currently being built.
+	 * 
+	 * @param project
+	 *            the project to set
+	 */
+	public void setProject(final MavenProject project) {
+		this.project = project;
+	}
+
+	/**
+	 * Set the directory where generated classes will be written.
+	 * 
+	 * @param generatedDirectory
+	 *            the generatedDirectory to set
+	 */
+	public void setGeneratedDirectory(final File generatedDirectory) {
+		this.generatedDirectory = generatedDirectory;
+	}
+
+	/**
+	 * Set includes patterns.
+	 * 
+	 * @param includes
+	 *            the includes to set
+	 */
+	public void setIncludes(final List<String> includes) {
+		this.includes = includes;
+	}
+
+	/**
+	 * Set excludes patterns.
+	 * 
+	 * @param excludes
+	 *            the excludes to set
+	 */
+	public void setExcludes(final List<String> excludes) {
+		this.excludes = excludes;
 	}
 }

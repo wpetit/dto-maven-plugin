@@ -168,8 +168,7 @@ public class ClassFinderImpl implements ClassFinder {
 	 */
 	protected String[] convertClassPatternsToPathPatterns(
 			final List<String> classPatterns) {
-		String[] pathPatterns = new String[0];
-		pathPatterns = new String[classPatterns.size()];
+		final String[] pathPatterns = new String[classPatterns.size()];
 		for (int i = 0; i < classPatterns.size(); i++) {
 			pathPatterns[i] = classPatterns.get(i).replace(".", File.separator)
 					+ ".class";
